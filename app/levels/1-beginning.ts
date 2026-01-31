@@ -1,7 +1,8 @@
 import { Level, PieceType } from '../types';
 
-export const LEVEL_1_1: Level = {
-    id: 'editor-level',
+export default <Level>{
+    id: '1-beginning',
+	name: 'Beginning',
     width: 6,
     height: 6,
     grid: [
@@ -12,7 +13,7 @@ export const LEVEL_1_1: Level = {
         "IIII#D",
         "IIII##"
     ],
-    mainSymbols: "🐱🐱🐱🐱🐱🐱🐱🐶🐱🐱🐱🐱🐱🐱🐱🐱",
+    mainSymbols: "🐶🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱",
     allowedSymbols: "🐱",
     disallowedSymbols: "🐶",
     initialPieces: [

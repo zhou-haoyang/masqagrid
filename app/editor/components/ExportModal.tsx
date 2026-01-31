@@ -14,7 +14,7 @@ interface ExportModalProps {
 }
 
 export function ExportModal({ level, onClose }: ExportModalProps) {
-  const [levelNumber, setLevelNumber] = useState('');
+  const [levelNumber, setLevelNumber] = useState(level.id);
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
   const [generatedCode, setGeneratedCode] = useState('');
   const [showCode, setShowCode] = useState(false);
@@ -29,9 +29,9 @@ export function ExportModal({ level, onClose }: ExportModalProps) {
     const result = validateLevel(level);
     setValidationResult(result);
 
-    if (!result.valid) {
-      return; // Don't generate if there are errors
-    }
+    // if (!result.valid) {
+    //   return; // Don't generate if there are errors
+    // }
 
     const num = levelNumber || 'new';
     const code = generateLevelCode(level, num);

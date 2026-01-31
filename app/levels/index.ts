@@ -1,12 +1,5 @@
 import { Level } from '../types';
 
-// Import all level files
-import { LEVEL_0 } from './0';
-import { LEVEL_1 } from './1';
-import { LEVEL_1_1 } from './1_1';
-import { LEVEL_2 } from './2';
-import { LEVEL_3 } from './3';
-
 // Level metadata for UI
 export interface LevelMetadata {
   id: string;
@@ -14,34 +7,36 @@ export interface LevelMetadata {
   level: Level;
 }
 
+// Type definition for Webpack's require.context
+interface RequireContext {
+  keys(): string[];
+  (id: string): { default: Level };
+}
+
+declare const require: {
+  context(
+    directory: string,
+    useSubdirectories: boolean,
+    regExp: RegExp
+  ): RequireContext;
+};
+
+// Automatically import all level files (excluding index.ts)
+const levelModules: RequireContext = require.context(
+  './',
+  false,
+  /^\.\/(?!index)[^/]+\.ts$/
+);
+
 // Registry of all available levels
-export const LEVELS: LevelMetadata[] = [
-  {
-    id: '1_1',
-    name: 'Level 1_1',
-    level: LEVEL_1_1,
-  },
-  {
-    id: '0',
-    name: 'Level 0',
-    level: LEVEL_0,
-  },
-  {
-    id: '1',
-    name: 'Level 2',
-    level: LEVEL_1,
-  },
-  {
-    id: '2',
-    name: 'Level 2',
-    level: LEVEL_2,
-  },
-  {
-    id: '3',
-    name: 'Level 3',
-    level: LEVEL_3,
-  },
-];
+export const LEVELS: LevelMetadata[] = levelModules.keys().map((fileName: string) => {
+  const level = levelModules(fileName).default;
+  return {
+    id: level.id,
+    name: level.name,
+    level: level,
+  };
+});
 
 // Helper to get level by ID
 export function getLevelById(id: string): Level | null {

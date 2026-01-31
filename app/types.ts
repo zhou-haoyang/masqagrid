@@ -32,6 +32,7 @@ export interface Region {
 
 export interface Level {
     id: string;
+    name: string;
     width: number;
     height: number;
     grid: string[]; // ASCII Grid: '.'=Empty, '#'=Blocked, 'M'=Main, 'A'=Allowed, 'D'=Disallowed, 'I'=Inventory

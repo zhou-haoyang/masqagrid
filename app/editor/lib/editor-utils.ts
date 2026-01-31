@@ -164,8 +164,9 @@ export function generateLevelCode(level: Level, levelNumber: number | string): s
 
   return `import { Level, PieceType } from '../types';
 
-export const LEVEL_${levelNumber}: Level = {
+export default <Level>{
     id: '${level.id || `level-${levelNumber}`}',
+    name: '${level.name || `Level ${levelNumber}`}',
     width: ${level.width},
     height: ${level.height},
     grid: [

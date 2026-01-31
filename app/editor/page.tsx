@@ -15,6 +15,8 @@ type BrushType = '.' | '#' | 'M' | 'A' | 'D' | 'I';
 
 export default function LevelEditor() {
   // Level data
+  const [id, setId] = useState('level-editor-' + Date.now());
+  const [name, setName] = useState('Unnamed Level');
   const [width, setWidth] = useState(20);
   const [height, setHeight] = useState(15);
   const [grid, setGrid] = useState<string[]>(Array(15).fill('.'.repeat(20)));
@@ -64,6 +66,12 @@ export default function LevelEditor() {
   const handleClearGrid = () => {
     if (confirm('Are you sure you want to clear the entire grid?')) {
       setGrid(Array(height).fill('.'.repeat(width)));
+    }
+  };
+
+  const handleClearPieces = () => {
+    if (confirm('Are you sure you want to clear all pieces?')) {
+      setPieces([]);
     }
   };
 
@@ -202,7 +210,8 @@ export default function LevelEditor() {
   // Validation and export
   const handleValidate = () => {
     const level: Level = {
-      id: 'editor-level',
+      id,
+      name,
       width,
       height,
       grid,
@@ -241,6 +250,8 @@ export default function LevelEditor() {
 
   const handleLoadLevel = (level: Level) => {
     console.log('Loading level:', level);
+    setId(level.id);
+    setName(level.name);
     setWidth(level.width);
     setHeight(level.height);
     setGrid(level.grid);
@@ -356,12 +367,18 @@ export default function LevelEditor() {
             </div>
           </div>
 
-          <div className="mt-6">
+          <div className="mt-6 space-y-2">
             <button
               onClick={handleAddPieceClick}
               className="w-full px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded"
             >
               Add Piece
+            </button>
+            <button
+              onClick={handleClearPieces}
+              className="w-full px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded transition-colors text-sm font-medium"
+            >
+              Clear Pieces
             </button>
           </div>
         </div>
@@ -382,31 +399,58 @@ export default function LevelEditor() {
             onPointerLeave={handleCanvasPointerUp}
           >
             {/* Grid cells */}
-            {grid.map((row, y) =>
-              row.split('').map((cell, x) => {
-                let bgColor = 'transparent';
-                if (cell === 'M') bgColor = '#93c5fd'; // blue-300
-                else if (cell === 'A') bgColor = '#86efac'; // green-300
-                else if (cell === 'D') bgColor = '#fca5a5'; // red-300
-                else if (cell === 'I') bgColor = '#d8b4fe'; // purple-300
-                else if (cell === '#') bgColor = '#9ca3af'; // gray-400
+            {(() => {
+              // Count indices for each cell type in reading order
+              let mIndex = 0, aIndex = 0, dIndex = 0;
 
-                return (
-                  <div
-                    key={`${y}-${x}`}
-                    style={{
-                      position: 'absolute',
-                      left: x * CELL_SIZE,
-                      top: y * CELL_SIZE,
-                      width: CELL_SIZE,
-                      height: CELL_SIZE,
-                      backgroundColor: bgColor,
-                      border: '1px solid rgba(0,0,0,0.05)'
-                    }}
-                  />
-                );
-              })
-            )}
+              return grid.map((row, y) =>
+                row.split('').map((cell, x) => {
+                  let bgColor = 'transparent';
+                  let symbol = '';
+
+                  if (cell === 'M') {
+                    bgColor = '#93c5fd'; // blue-300
+                    symbol = [...mainSymbols][mIndex] || '';
+                    mIndex++;
+                  } else if (cell === 'A') {
+                    bgColor = '#86efac'; // green-300
+                    symbol = [...allowedSymbols][aIndex] || '';
+                    aIndex++;
+                  } else if (cell === 'D') {
+                    bgColor = '#fca5a5'; // red-300
+                    symbol = [...disallowedSymbols][dIndex] || '';
+                    dIndex++;
+                  } else if (cell === 'I') {
+                    bgColor = '#d8b4fe'; // purple-300
+                  } else if (cell === '#') {
+                    bgColor = '#9ca3af'; // gray-400
+                  }
+
+                  return (
+                    <div
+                      key={`${y}-${x}`}
+                      style={{
+                        position: 'absolute',
+                        left: x * CELL_SIZE,
+                        top: y * CELL_SIZE,
+                        width: CELL_SIZE,
+                        height: CELL_SIZE,
+                        backgroundColor: bgColor,
+                        border: '1px solid rgba(0,0,0,0.05)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '20px',
+                        fontWeight: 'bold',
+                        color: '#1f2937'
+                      }}
+                    >
+                      {symbol}
+                    </div>
+                  );
+                })
+              );
+            })()}
 
             {/* Pieces */}
             {pieces.map(piece => {
@@ -450,8 +494,35 @@ export default function LevelEditor() {
 
         {/* Right Sidebar - Symbol Streams */}
         <div className="w-80 bg-white border-l border-gray-200 p-4">
+          <h2 className="font-semibold mb-4">Level Info</h2>
+          <div className="mb-6">
+            <label className="block text-sm font-medium mb-1">
+              Level ID
+            </label>
+            <input
+              type="text"
+              value={id}
+              onChange={e => setId(e.target.value)}
+              className="w-full px-3 py-2 border rounded text-sm"
+              placeholder="Enter level ID"
+            />
+          </div>
+
+          <div className="mb-6">
+            <label className="block text-sm font-medium mb-1">
+              Level Name
+            </label>
+            <input
+              type="text"
+              value={name}
+              onChange={e => setName(e.target.value)}
+              className="w-full px-3 py-2 border rounded text-sm"
+              placeholder="Enter level name"
+            />
+          </div>
+
           <h2 className="font-semibold mb-4">Symbol Streams</h2>
-          
+
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium mb-1">
@@ -527,7 +598,8 @@ export default function LevelEditor() {
       {showExportModal && (
         <ExportModal
           level={{
-            id: 'editor-level',
+            id,
+            name,
             width,
             height,
             grid,
