@@ -7,16 +7,16 @@ export default <Level>{
     height: 9,
     grid: [
         "MMMMM###",
-        "M...M#A#",
-        "M.M.M###",
-        "M...M#D#",
+        "MMMMM#A#",
+        "MMMMM###",
+        "MMMMM#D#",
         "MMMMM###",
         "IIIIIIII",
         "IIIIIIII",
         "IIIIIIII",
         "IIIIIIII"
     ],
-    mainSymbols: "🐶🐶🐶🐶🐶🐶🐶🐶🐱🐶🐶🐶🐶🐶🐶🐶🐶",
+    mainSymbols: "🐶🐶🐶🐶🐶🐶🐱🐱🐱🐶🐶🐱🐱🐱🐶🐶🐱🐱🐱🐶🐶🐶🐶🐶🐶",
     allowedSymbols: "🐱",
     disallowedSymbols: "🐶",
     initialPieces: [

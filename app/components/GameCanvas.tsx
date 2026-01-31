@@ -20,6 +20,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
     const [pieces, setPieces] = useState<Piece[]>(initialPiecesWithIds(level.initialPieces));
     const [history, setHistory] = useState<Piece[][]>([]);
     const [winState, setWinState] = useState<WinState>({ isWin: false, violations: [], violatingCells: [] }); // [NEW]
+    const [moveId, setMoveId] = useState(0); // Trigger animation sync
 
     // Parse level grid into runtime structures
     const parsed = parseLevel(level);
@@ -184,6 +185,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
         if (result.success && changedPosition) {
             setHistory(prev => [...prev, previousState]);
             setPieces(result.newPieces);
+            setMoveId(m => m + 1); // Trigger animation
 
             // Check Win [NEW]
             // We need to wait for state update? No, we have the new pieces.
@@ -213,6 +215,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
         if (previous) {
             setPieces(previous);
             setWinState(checkWinCondition(regions, previous)); // Re-check
+            setMoveId(m => m + 1); // Trigger animation
         }
     };
 
@@ -222,6 +225,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
             setPieces(initial);
             setHistory([]);
             setWinState(checkWinCondition(regions, initial)); // Re-check
+            setMoveId(m => m + 1); // Trigger animation
         }
     };
 
@@ -346,7 +350,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
                             {isViolating && (
                                 <>
                                     {/* One-shot Ripple (Ring Shockwave) */}
-                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+                                    <div key={`ripple-${moveId}`} className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
                                         <div className="w-2 h-2 rounded-full animate-ripple"
                                             style={{
                                                 background: 'radial-gradient(circle, transparent 20%, rgba(239,68,68,0.9) 40%, rgba(239,68,68,0) 70%)',
@@ -359,7 +363,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
                                     <div className="absolute inset-0 border-2 border-red-500/60 pointer-events-none z-10"
                                         style={{
                                             opacity: 0,
-                                            animation: 'fadeIn 0.5s ease-out forwards'
+                                            animation: 'fadeIn 0.5s ease-out forwards, pulsate-red 2s infinite 0.5s'
                                         }}
                                     />
                                 </>

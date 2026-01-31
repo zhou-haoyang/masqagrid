@@ -25,13 +25,6 @@ export default <Level>{
             shape: [[1,1],[1,1]]
         },
         {
-            id: 'item-1769882821394-pc0e4c2',
-            type: PieceType.INTERSECT,
-            color: '#fbbf24',
-            position: { x: 2, y: 7 },
-            shape: [[1,1],[0,0]]
-        },
-        {
             id: 'item-1769882865875-g9pnirt',
             type: PieceType.INTERSECT,
             color: '#fbbf24',
