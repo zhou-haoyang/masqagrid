@@ -333,7 +333,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                fontSize: '10px',
+                                fontSize: '16px',
                                 fontFamily: 'var(--font-pixel)',
                                 color: '#374151',
                                 zIndex: isViolating ? 6 : (cellType === '#' ? 5 : 0),
