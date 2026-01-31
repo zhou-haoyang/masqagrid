@@ -7,9 +7,9 @@ export default <Level>{
     height: 9,
     grid: [
         "MMMMM###",
-        "M###M##A",
-        "M#M#M###",
-        "M###M##D",
+        "M...M#A#",
+        "M.M.M###",
+        "M...M#D#",
         "MMMMM###",
         "IIIIIIII",
         "IIIIIIII",

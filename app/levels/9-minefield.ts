@@ -16,7 +16,7 @@ export default <Level>{
     ],
     mainSymbols: "🐱🐬🐶🐌🐬🐶🐸🐸🐖🐸🐬🐶🐱🐖🐬🐶🐸🐖🐸🐶🐸",
     allowedSymbols: "",
-    disallowedSymbols: "🐸🐬🐌🐌🦅🐖🐱🦅🐖🐌🐱🐱🦅🐌",
+    disallowedSymbols: "🐌🐬🐌🐸🦅🐖🐱🦅🐖🐱🐱🐌🦅🐌",
     initialPieces: [
         {
             id: 'item-1769894743441-ljhz8ry',

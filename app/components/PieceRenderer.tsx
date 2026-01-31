@@ -1,16 +1,23 @@
-import React from 'react';
-import { Piece } from '../types';
+import { Piece, Position } from '../types';
 import { getPieceColor } from '../lib/piece-utils';
 
 interface PieceRendererProps {
     piece: Piece;
     cellSize: number;
     isDragging?: boolean;
+    violatingCells?: Position[];
     onPointerDown?: (e: React.PointerEvent) => void;
     style?: React.CSSProperties;
 }
 
-export const PieceRenderer: React.FC<PieceRendererProps> = ({ piece, cellSize, isDragging, onPointerDown, style }) => {
+export const PieceRenderer: React.FC<PieceRendererProps> = ({ 
+    piece, 
+    cellSize, 
+    isDragging, 
+    violatingCells = [],
+    onPointerDown, 
+    style 
+}) => {
     const displayColor = getPieceColor(piece.type);
 
     return (
@@ -53,11 +60,16 @@ export const PieceRenderer: React.FC<PieceRendererProps> = ({ piece, cellSize, i
 
                         const borderStyle = '3px solid rgba(0,0,0,0.6)';
 
+                        const globalX = piece.position.x + c;
+                        const globalY = piece.position.y + r;
+                        const isThisCellViolating = violatingCells.some(vc => vc.x === globalX && vc.y === globalY);
+
                         return (
                             <div key={`${r}-${c}`} style={{ width: '100%', height: '100%' }}>
                                 <div
                                     style={{
                                         backgroundColor: displayColor,
+                                        opacity: isThisCellViolating ? 0.6 : 1,
                                         width: '100%',
                                         height: '100%',
                                         boxSizing: 'border-box',

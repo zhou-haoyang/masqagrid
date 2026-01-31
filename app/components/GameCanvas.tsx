@@ -425,6 +425,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
                             piece={isDragging ? { ...piece, shape: draggedPieceShape || piece.shape } : piece} 
                             cellSize={CELL_SIZE} 
                             isDragging={isDragging}
+                            violatingCells={winState.violatingCells}
                             onPointerDown={isDragging ? undefined : (e: React.PointerEvent) => handlePointerDown(e, piece)}
                             style={dragStyle}
                         />

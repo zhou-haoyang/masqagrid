@@ -12,7 +12,7 @@ export default <Level>{
         "IIIIIIIII",
         "IIIIIIIII",
     ],
-    mainSymbols: "🐶🐱🐱🐱🐱🐱🐱🐱🐶",
+    mainSymbols: "🐶🐶🐱🐶🐶🐶🐱🐶🐶",
     allowedSymbols: "🐱",
     disallowedSymbols: "🐶",
     initialPieces: [

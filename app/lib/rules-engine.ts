@@ -64,21 +64,67 @@ export interface WinState {
     violatingCells: Position[]; // Coordinates of cells causing violations
 }
 
+/**
+ * Returns ALL symbols (visible and covered) for a given region.
+ */
+export function getAllSymbolsWithCoords(
+    regions: Region[],
+    regionId: string
+): { symbol: string, x: number, y: number }[] {
+    const region = regions.find(r => r.id === regionId);
+    if (!region || !region.symbols) return [];
+
+    const all: { symbol: string, x: number, y: number }[] = [];
+
+    for (let r = 0; r < region.height; r++) {
+        for (let c = 0; c < region.width; c++) {
+            const symbol = region.symbols[r][c];
+            if (symbol && symbol.trim() !== '') {
+                all.push({ symbol, x: region.x + c, y: region.y + r });
+            }
+        }
+    }
+
+    return all;
+}
+
 export function checkWinCondition(regions: Region[], pieces: Piece[]): WinState {
     // 1. Determine Rules
-    // Rules are dynamic: They depend on what is visible in the Rule Regions
     const allowedSymbols = new Set(getVisibleSymbols(regions, pieces, 'allowed-region'));
     const disallowedSymbols = new Set(getVisibleSymbols(regions, pieces, 'disallowed-region'));
 
-    // 2. Determine State
-    const mainSymbols = getVisibleSymbolsWithCoords(regions, pieces, 'main-region');
+    // 2. Get All Potential Symbols in Main
+    const allMainSymbols = getAllSymbolsWithCoords(regions, 'main-region');
 
-    // 3. Evaluate
+    // 3. Evaluate Violations
     const violations = new Set<string>();
     const violatingCells: Position[] = [];
 
-    for (const item of mainSymbols) {
-        if (disallowedSymbols.has(item.symbol)) {
+    for (const item of allMainSymbols) {
+        // Check if this specific coordinate is covered
+        let isCovered = false;
+        for (const p of pieces) {
+            if (
+                item.x >= p.position.x &&
+                item.x < p.position.x + p.shape[0].length &&
+                item.y >= p.position.y &&
+                item.y < p.position.y + p.shape.length
+            ) {
+                if (p.shape[item.y - p.position.y][item.x - p.position.x] === 1) {
+                    isCovered = true;
+                    break;
+                }
+            }
+        }
+
+        // Rule A: Disallowed symbols MUST NOT be visible
+        if (!isCovered && disallowedSymbols.has(item.symbol)) {
+            violations.add(item.symbol);
+            violatingCells.push({ x: item.x, y: item.y });
+        }
+
+        // Rule B: Allowed symbols MUST NOT be covered
+        if (isCovered && allowedSymbols.has(item.symbol)) {
             violations.add(item.symbol);
             violatingCells.push({ x: item.x, y: item.y });
         }
