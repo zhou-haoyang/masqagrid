@@ -710,7 +710,10 @@ export default function LevelEditor() {
                       onPointerUp={handlePiecePointerUp}
                       onContextMenu={(e) => handlePieceContextMenu(e, piece)}
                     >
-                      <PieceRenderer piece={piece} cellSize={CELL_SIZE} />
+                      <PieceRenderer
+                        piece={{ ...piece, position: { x: 0, y: 0 } }}
+                        cellSize={CELL_SIZE}
+                      />
                     </div>
                   );
                 })}
