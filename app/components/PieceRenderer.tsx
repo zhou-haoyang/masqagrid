@@ -10,13 +10,13 @@ interface PieceRendererProps {
     style?: React.CSSProperties;
 }
 
-export const PieceRenderer: React.FC<PieceRendererProps> = ({ 
-    piece, 
-    cellSize, 
-    isDragging, 
+export const PieceRenderer: React.FC<PieceRendererProps> = ({
+    piece,
+    cellSize,
+    isDragging,
     violatingCells = [],
-    onPointerDown, 
-    style 
+    onPointerDown,
+    style
 }) => {
     const displayColor = getPieceColor(piece.type);
 
@@ -57,7 +57,7 @@ export const PieceRenderer: React.FC<PieceRendererProps> = ({
                         const hasLeft = c > 0 && piece.shape[r][c - 1] === 1;
                         const hasRight = c < piece.shape[0].length - 1 && piece.shape[r][c + 1] === 1;
 
-                        const borderDark = '4px solid #111827'; // Dark outline
+                        const borderDark = '4px solid var(--piece-border)'; // Themed outline
 
                         const globalX = piece.position.x + c;
                         const globalY = piece.position.y + r;

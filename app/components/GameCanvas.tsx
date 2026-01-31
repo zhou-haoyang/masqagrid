@@ -266,7 +266,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
             lines.push(
                 <div key={`v-${i}`} style={{
                     position: 'absolute', left: i * CELL_SIZE, top: 0, bottom: 0,
-                    borderLeft: '1px solid #e5e5e5'
+                    borderLeft: '1px solid var(--grid-line)'
                 }} />
             );
         }
@@ -274,7 +274,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
             lines.push(
                 <div key={`h-${i}`} style={{
                     position: 'absolute', top: i * CELL_SIZE, left: 0, right: 0,
-                    borderTop: '1px solid #e5e5e5'
+                    borderTop: '1px solid var(--grid-line)'
                 }} />
             );
         }
@@ -294,27 +294,27 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
                 let border = 'none';
 
                 if (cellType === 'M') {
-                    bgColor = '#e0f2fe'; // Sky 100 (Main)
+                    bgColor = 'var(--color-region-sky)';
                     border = '2px solid rgba(0,0,0,0.1)';
                 } else if (cellType === 'A') {
-                    bgColor = '#bbf7d0'; // Green 200 (Grass)
+                    bgColor = 'var(--color-region-grass)';
                     border = '2px solid rgba(0,0,0,0.1)';
                 } else if (cellType === 'D') {
-                    bgColor = '#fecaca'; // Red 200 (Lava/Danger)
+                    bgColor = 'var(--color-region-lava)';
                     border = '2px solid rgba(0,0,0,0.1)';
                 } else if (cellType === 'I') {
-                    bgColor = '#ffedd5'; // Orange 100 (Wood/Inventory)
+                    bgColor = 'var(--color-region-wood)';
                     border = '2px solid rgba(0,0,0,0.1)';
                 } else if (cellType === '#') {
-                    bgColor = '#374151'; // Gray 700
-                    bgImage = 'repeating-linear-gradient(45deg, #1f2937 0, #1f2937 4px, #374151 4px, #374151 8px)';
-                    border = '2px solid #111827';
+                    bgColor = 'var(--color-wall)';
+                    bgImage = 'repeating-linear-gradient(45deg, var(--color-wall-accent) 0, var(--color-wall-accent) 4px, var(--color-wall) 4px, var(--color-wall) 8px)';
+                    border = '2px solid var(--foreground)';
                 } else if (cellType === 'a') {
-                    bgColor = '#bbf7d0'; // Green 200
+                    bgColor = 'var(--color-region-grass)';
                     bgImage = 'repeating-linear-gradient(45deg, rgba(0,0,0,0.05) 0, rgba(0,0,0,0.05) 2px, transparent 2px, transparent 10px)';
                     border = '2px solid rgba(0,0,0,0.1)';
                 } else if (cellType === 'd') {
-                    bgColor = '#fecaca'; // Red 200
+                    bgColor = 'var(--color-region-lava)';
                     bgImage = 'repeating-linear-gradient(45deg, rgba(0,0,0,0.05) 0, rgba(0,0,0,0.05) 2px, transparent 2px, transparent 10px)';
                     border = '2px solid rgba(0,0,0,0.1)';
                 }
@@ -339,7 +339,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
                                 justifyContent: 'center',
                                 fontSize: '16px',
                                 fontFamily: 'var(--font-pixel)',
-                                color: '#374151',
+                                color: 'var(--foreground)',
                                 zIndex: isViolating ? 6 : (cellType === '#' ? 5 : 0),
                                 boxSizing: 'border-box',
                                 boxShadow: cellType === '#' ? 'inset 2px 2px 0 rgba(255,255,255,0.1), inset -2px -2px 0 rgba(0,0,0,0.3)' : 'none',
@@ -417,7 +417,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
             `}} />
             {/* Status Panel */}
             {/* Status Panel */}
-            <div className={`fixed top-4 right-4 p-4 border-4 shadow-[4px_4px_0_0_rgba(0,0,0,0.2)] transition-all z-50 ${winState.isWin ? 'bg-green-100 border-green-600' : 'bg-white border-gray-900'
+            <div className={`fixed top-4 right-4 p-4 border-4 shadow-[4px_4px_0_0_rgba(0,0,0,0.2)] transition-all z-50 ${winState.isWin ? 'bg-green-100 border-green-600' : 'bg-[var(--panel-bg)] border-[var(--panel-border)]'
                 }`}>
                 <div className="flex items-center gap-4 mb-2">
                     {winState.isWin ? (
@@ -425,7 +425,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
                     ) : (
                         <AlertTriangle className="text-amber-500" size={24} />
                     )}
-                    <h3 className={`font-bold text-sm ${winState.isWin ? 'text-green-800' : 'text-gray-900'}`} style={{ textTransform: 'uppercase' }}>
+                    <h3 className={`font-bold text-sm ${winState.isWin ? 'text-green-800' : 'text-[var(--panel-text)]'}`} style={{ textTransform: 'uppercase' }}>
                         {winState.isWin ? 'Level Cleared!' : 'Status'}
                     </h3>
                 </div>
@@ -457,7 +457,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
                     className="flex items-center gap-2 px-4 py-3 bg-gray-800 text-white hover:bg-gray-700 disabled:opacity-50 border-b-4 border-gray-950 active:border-b-0 active:translate-y-1 font-bold text-xs uppercase shadow-md transition-all">
                     <Undo2 size={16} /> Undo (Z)
                 </button>
-                <div className="flex items-center gap-2 px-4 py-3 bg-white text-gray-900 border-2 border-gray-900 border-b-4 text-xs font-bold shadow-md">
+                <div className="flex items-center gap-2 px-4 py-3 bg-[var(--panel-bg)] text-[var(--panel-text)] border-2 border-[var(--panel-border)] border-b-4 text-xs font-bold shadow-md">
                     <RotateCw size={14} /> <span>Rotate: R</span>
                     <span className="w-0.5 h-4 bg-gray-300 mx-2" />
                     <FlipHorizontal size={14} /> <span>Flip: F</span>
@@ -471,7 +471,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
             {/* Game Canvas Container */}
             <div
                 ref={containerRef}
-                className="relative bg-white shadow-[8px_8px_0_0_rgba(0,0,0,0.2)] border-4 border-gray-900"
+                className="relative bg-[var(--panel-bg)] shadow-[8px_8px_0_0_rgba(0,0,0,0.2)] border-4 border-[var(--panel-border)]"
                 style={{
                     width: level.width * CELL_SIZE,
                     height: level.height * CELL_SIZE,
