@@ -58,7 +58,7 @@ export const PieceRenderer: React.FC<PieceRendererProps> = ({
                         const hasLeft = c > 0 && piece.shape[r][c - 1] === 1;
                         const hasRight = c < piece.shape[0].length - 1 && piece.shape[r][c + 1] === 1;
 
-                        const borderStyle = '3px solid rgba(0,0,0,0.6)';
+                        const borderDark = '4px solid #111827'; // Dark outline
 
                         const globalX = piece.position.x + c;
                         const globalY = piece.position.y + r;
@@ -73,13 +73,16 @@ export const PieceRenderer: React.FC<PieceRendererProps> = ({
                                         width: '100%',
                                         height: '100%',
                                         boxSizing: 'border-box',
-                                        // Thick borders on outer edges
-                                        borderTop: hasTop ? undefined : borderStyle,
-                                        borderBottom: hasBottom ? undefined : borderStyle,
-                                        borderLeft: hasLeft ? undefined : borderStyle,
-                                        borderRight: hasRight ? undefined : borderStyle,
-                                        // Internal grid lines
-                                        boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.2)', 
+                                        // Thick borders on outer edges to outline the shape
+                                        borderTop: hasTop ? undefined : borderDark,
+                                        borderBottom: hasBottom ? undefined : borderDark,
+                                        borderLeft: hasLeft ? undefined : borderDark,
+                                        borderRight: hasRight ? undefined : borderDark,
+                                        // Inner 3D bevel effect
+                                        boxShadow: `
+                                            inset 4px 4px 0px 0px rgba(255,255,255,0.4),
+                                            inset -4px -4px 0px 0px rgba(0,0,0,0.2)
+                                        `,
                                     }}
                                 />
                             </div>

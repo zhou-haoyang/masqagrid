@@ -20,7 +20,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
     const [pieces, setPieces] = useState<Piece[]>(initialPiecesWithIds(level.initialPieces));
     const [history, setHistory] = useState<Piece[][]>([]);
     const [winState, setWinState] = useState<WinState>({ isWin: false, violations: [], violatingCells: [] }); // [NEW]
-    
+
     // Parse level grid into runtime structures
     const parsed = parseLevel(level);
     const { regions, symbolMap, gridCells } = parsed;
@@ -28,7 +28,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
     // Drag State
     const [draggedPieceId, setDraggedPieceId] = useState<string | null>(null);
     const [draggedPieceShape, setDraggedPieceShape] = useState<number[][] | null>(null); // Original shape when drag started
-    const [dragRotation, setDragRotation] = useState(0); 
+    const [dragRotation, setDragRotation] = useState(0);
     const [dragFlipped, setDragFlipped] = useState(false);
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 }); // Offset cursor -> top-left of piece (pixels)
     const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 }); // Current pixel position of top-left
@@ -123,12 +123,12 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
 
         // Apply visual transforms to shape before dropping
         let finalShape = draggedPieceShape || originalPiece.shape;
-        
+
         // Apply flip first if needed
         if (dragFlipped) {
             finalShape = flipMatrixHorizontal(finalShape);
         }
-        
+
         // Apply rotation (normalized to 0-270)
         const normalizedRotation = ((dragRotation % 360) + 360) % 360;
         const rotations = normalizedRotation / 90;
@@ -230,6 +230,30 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
         setWinState(checkWinCondition(regions, pieces));
     }, []); // Run once
 
+    // [NEW] Track resolving cells for exit animation
+    const [resolvingCells, setResolvingCells] = useState<{ x: number, y: number, id: string }[]>([]);
+    const prevViolationsRef = useRef<typeof winState.violatingCells>([]);
+
+    useEffect(() => {
+        const prev = prevViolationsRef.current;
+        const current = winState.violatingCells;
+
+        // Find cells that were in prev but NOT in current
+        const resolved = prev.filter(p => !current.some(c => c.x === p.x && c.y === p.y));
+
+        if (resolved.length > 0) {
+            const newResolving = resolved.map(p => ({ ...p, id: Math.random().toString(36).substr(2, 9) }));
+            setResolvingCells(prev => [...prev, ...newResolving]);
+
+            // Remove after animation
+            setTimeout(() => {
+                setResolvingCells(prev => prev.filter(p => !newResolving.some(nr => nr.id === p.id)));
+            }, 1000);
+        }
+
+        prevViolationsRef.current = current;
+    }, [winState.violatingCells]);
+
     // --- Rendering Helpers ---
 
     const renderGridLines = () => {
@@ -259,40 +283,41 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
             for (let x = 0; x < level.width; x++) {
                 const cellType = gridCells[y]?.[x] || '.';
                 const symbol = symbolMap.get(`${x},${y}`) || '';
-                
+
                 // Determine background color
                 let bgColor = 'transparent';
                 let bgImage = '';
                 let border = 'none';
-                
+
                 if (cellType === 'M') {
-                    bgColor = '#f0f9ff'; // Light Blue (Main)
-                    border = '1px solid rgba(0,0,0,0.05)';
+                    bgColor = '#e0f2fe'; // Sky 100 (Main)
+                    border = '2px solid rgba(0,0,0,0.1)';
                 } else if (cellType === 'A') {
-                    bgColor = '#dcfce7'; // Green-100 (Allowed)
-                    border = '1px solid rgba(0,0,0,0.05)';
+                    bgColor = '#bbf7d0'; // Green 200 (Grass)
+                    border = '2px solid rgba(0,0,0,0.1)';
                 } else if (cellType === 'D') {
-                    bgColor = '#fee2e2'; // Red-100 (Disallowed)
-                    border = '1px solid rgba(0,0,0,0.05)';
+                    bgColor = '#fecaca'; // Red 200 (Lava/Danger)
+                    border = '2px solid rgba(0,0,0,0.1)';
                 } else if (cellType === 'I') {
-                    bgColor = '#f3f4f6'; // Gray-100 (Inventory)
-                    border = '1px solid rgba(0,0,0,0.05)';
+                    bgColor = '#ffedd5'; // Orange 100 (Wood/Inventory)
+                    border = '2px solid rgba(0,0,0,0.1)';
                 } else if (cellType === '#') {
-                    bgColor = '#ffffff';
-                    bgImage = 'repeating-linear-gradient(45deg, #e5e7eb 0, #e5e7eb 2px, #ffffff 2px, #ffffff 10px)';
-                    border = '1px solid #e5e5e5';
+                    bgColor = '#374151'; // Gray 700
+                    bgImage = 'repeating-linear-gradient(45deg, #1f2937 0, #1f2937 4px, #374151 4px, #374151 8px)';
+                    border = '2px solid #111827';
                 } else if (cellType === 'a') {
-                    bgColor = '#dcfce7'; // Green-100
+                    bgColor = '#bbf7d0'; // Green 200
                     bgImage = 'repeating-linear-gradient(45deg, rgba(0,0,0,0.05) 0, rgba(0,0,0,0.05) 2px, transparent 2px, transparent 10px)';
-                    border = '1px solid rgba(0,0,0,0.1)';
+                    border = '2px solid rgba(0,0,0,0.1)';
                 } else if (cellType === 'd') {
-                    bgColor = '#fee2e2'; // Red-100
+                    bgColor = '#fecaca'; // Red 200
                     bgImage = 'repeating-linear-gradient(45deg, rgba(0,0,0,0.05) 0, rgba(0,0,0,0.05) 2px, transparent 2px, transparent 10px)';
-                    border = '1px solid rgba(0,0,0,0.1)';
+                    border = '2px solid rgba(0,0,0,0.1)';
                 }
-                
+
                 const isViolating = winState.violatingCells.some(c => c.x === x && c.y === y);
-                
+                const isResolving = resolvingCells.some(c => c.x === x && c.y === y);
+
                 if (cellType !== '.') {
                     cells.push(
                         <div key={`cell-${y}-${x}`}
@@ -304,19 +329,56 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
                                 height: CELL_SIZE,
                                 backgroundColor: bgColor,
                                 backgroundImage: bgImage,
-                                border: isViolating ? '2px solid #ef4444' : border,
+                                border: border,
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                fontSize: '20px',
-                                fontWeight: 'bold',
+                                fontSize: '10px',
+                                fontFamily: 'var(--font-pixel)',
                                 color: '#374151',
                                 zIndex: isViolating ? 6 : (cellType === '#' ? 5 : 0),
                                 boxSizing: 'border-box',
-                                animation: isViolating ? 'pulsate-red 2s infinite ease-in-out' : 'none'
+                                boxShadow: cellType === '#' ? 'inset 2px 2px 0 rgba(255,255,255,0.1), inset -2px -2px 0 rgba(0,0,0,0.3)' : 'none',
+                                overflow: 'hidden', // Clip the ripple to the cell
                             }}
                         >
-                            {symbol}
+                            {/* Violation Overlay */}
+                            {isViolating && (
+                                <>
+                                    {/* One-shot Ripple (Ring Shockwave) */}
+                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+                                        <div className="w-2 h-2 rounded-full animate-ripple"
+                                            style={{
+                                                background: 'radial-gradient(circle, transparent 20%, rgba(239,68,68,0.9) 40%, rgba(239,68,68,0) 70%)',
+                                                animation: 'ripple-red 1s ease-out 1 forwards'
+                                            }}
+                                        />
+                                    </div>
+
+                                    {/* Delayed Persistent Border */}
+                                    <div className="absolute inset-0 border-2 border-red-500/60 pointer-events-none z-10"
+                                        style={{
+                                            opacity: 0,
+                                            animation: 'fadeIn 0.5s ease-out forwards'
+                                        }}
+                                    />
+                                </>
+                            )}
+
+                            {/* Content */}
+                            <span className="relative z-0">{symbol}</span>
+
+                            {/* Resolve Animation (Green Ripple) */}
+                            {isResolving && (
+                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+                                    <div className="w-2 h-2 rounded-full animate-ripple"
+                                        style={{
+                                            background: 'radial-gradient(circle, rgba(74,222,128,0.9) 0%, rgba(74,222,128,0) 70%)',
+                                            animation: 'ripple-green 0.6s ease-out 1 forwards'
+                                        }}
+                                    />
+                                </div>
+                            )}
                         </div>
                     );
                 }
@@ -329,33 +391,47 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
 
     return (
         <div className="flex flex-col items-center gap-4 p-8 select-none relative">
-            <style dangerouslySetInnerHTML={{ __html: `
+            <style dangerouslySetInnerHTML={{
+                __html: `
                 @keyframes pulsate-red {
-                    0% { border-color: rgba(239, 68, 68, 0.4); box-shadow: inset 0 0 4px rgba(239, 68, 68, 0.4); }
-                    50% { border-color: rgba(239, 68, 68, 1); box-shadow: inset 0 0 10px rgba(239, 68, 68, 0.4); }
-                    100% { border-color: rgba(239, 68, 68, 0.4); box-shadow: inset 0 0 4px rgba(239, 68, 68, 0.4); }
+                    0% { border-color: rgba(239, 68, 68, 0.3); box-shadow: inset 0 0 2px rgba(239, 68, 68, 0.1); }
+                    50% { border-color: rgba(239, 68, 68, 0.7); box-shadow: inset 0 0 8px rgba(239, 68, 68, 0.3); }
+                    100% { border-color: rgba(239, 68, 68, 0.3); box-shadow: inset 0 0 2px rgba(239, 68, 68, 0.1); }
+                }
+                @keyframes ripple-red {
+                    0% { transform: scale(1); opacity: 0.8; }
+                    100% { transform: scale(12); opacity: 0; }
+                }
+                @keyframes ripple-green {
+                    0% { transform: scale(1); opacity: 0.8; }
+                    100% { transform: scale(12); opacity: 0; }
+                }
+                @keyframes fadeIn {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
                 }
             `}} />
             {/* Status Panel */}
-            <div className={`fixed top-4 right-4 p-4 rounded-lg shadow-lg border transition-all z-50 ${winState.isWin ? 'bg-green-50 border-green-200' : 'bg-white border-gray-200'
+            {/* Status Panel */}
+            <div className={`fixed top-4 right-4 p-4 border-4 shadow-[4px_4px_0_0_rgba(0,0,0,0.2)] transition-all z-50 ${winState.isWin ? 'bg-green-100 border-green-600' : 'bg-white border-gray-900'
                 }`}>
-                <div className="flex items-center gap-2 mb-2">
+                <div className="flex items-center gap-4 mb-2">
                     {winState.isWin ? (
-                        <Trophy className="text-green-600" />
+                        <Trophy className="text-green-600" size={24} />
                     ) : (
-                        <AlertTriangle className="text-amber-500" />
+                        <AlertTriangle className="text-amber-500" size={24} />
                     )}
-                    <h3 className={`font-bold ${winState.isWin ? 'text-green-800' : 'text-gray-800'}`}>
+                    <h3 className={`font-bold text-sm ${winState.isWin ? 'text-green-800' : 'text-gray-900'}`} style={{ textTransform: 'uppercase' }}>
                         {winState.isWin ? 'Level Cleared!' : 'Status'}
                     </h3>
                 </div>
 
                 {!winState.isWin && winState.violations.length > 0 && (
-                    <div className="text-sm text-red-600">
-                        <p className="font-semibold">Violations:</p>
-                        <div className="flex gap-1 mt-1">
+                    <div className="text-xs text-red-600">
+                        <p className="font-bold mb-1">VIOLATIONS:</p>
+                        <div className="flex flex-col gap-1 mt-1">
                             {winState.violations.map(v => (
-                                <span key={v} className="px-2 py-0.5 bg-red-100 rounded border border-red-200 font-mono">
+                                <span key={v} className="px-1 bg-red-100 border-2 border-red-300 font-bold block w-fit">
                                     {v}
                                 </span>
                             ))}
@@ -364,35 +440,36 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
                 )}
 
                 {!winState.isWin && winState.violations.length === 0 && (
-                    <div className="text-sm text-gray-500">
-                        No immediate violations...
+                    <div className="text-xs text-gray-500 font-bold">
+                        NO VIOLATIONS...
                     </div>
                 )}
             </div>
 
             {/* Controls */}
-            <div className="flex gap-4 mb-2">
+            {/* Controls */}
+            <div className="flex gap-4 mb-4">
                 <button onClick={handleUndo} disabled={history.length === 0}
-                    className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-700 disabled:opacity-50">
-                    <Undo2 size={16} /> Undo <b>Z</b>
+                    className="flex items-center gap-2 px-4 py-3 bg-gray-800 text-white hover:bg-gray-700 disabled:opacity-50 border-b-4 border-gray-950 active:border-b-0 active:translate-y-1 font-bold text-xs uppercase shadow-md transition-all">
+                    <Undo2 size={16} /> Undo (Z)
                 </button>
-                <div className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-600 rounded border border-gray-200 text-sm">
-                   <RotateCw size={14} /> <span>Rotate: <b>R</b></span>
-                   <span className="w-px h-4 bg-gray-300 mx-1"/>
-                   <FlipHorizontal size={14} /> <span>Flip: <b>F</b></span>
+                <div className="flex items-center gap-2 px-4 py-3 bg-white text-gray-900 border-2 border-gray-900 border-b-4 text-xs font-bold shadow-md">
+                    <RotateCw size={14} /> <span>Rotate: R</span>
+                    <span className="w-0.5 h-4 bg-gray-300 mx-2" />
+                    <FlipHorizontal size={14} /> <span>Flip: F</span>
                 </div>
                 <button onClick={handleReset}
-                    className="flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300">
-                    <RefreshCcw size={16} /> Reset <b>C</b>
+                    className="flex items-center gap-2 px-4 py-3 bg-gray-200 text-gray-900 hover:bg-gray-300 border-b-4 border-gray-400 active:border-b-0 active:translate-y-1 font-bold text-xs uppercase shadow-md transition-all">
+                    <RefreshCcw size={16} /> Reset (C)
                 </button>
             </div>
 
             {/* Game Canvas Container */}
             <div
                 ref={containerRef}
-                className="relative bg-white shadow-xl rounded-lg overflow-hidden border border-gray-200"
-                style={{ 
-                    width: level.width * CELL_SIZE, 
+                className="relative bg-white shadow-[8px_8px_0_0_rgba(0,0,0,0.2)] border-4 border-gray-900"
+                style={{
+                    width: level.width * CELL_SIZE,
                     height: level.height * CELL_SIZE,
                     boxSizing: 'content-box'
                 }}
@@ -408,7 +485,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
                 {/* Layer 2: Pieces */}
                 {pieces.map(piece => {
                     const isDragging = piece.id === draggedPieceId;
-                    
+
                     // Construct style overrides for the dragging piece
                     // We keep the SAME Component instance for both dragging and non-dragging
                     // for the same piece ID, ensuring CSS transitions work.
@@ -420,10 +497,10 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
                     } : {};
 
                     return (
-                        <PieceRenderer 
+                        <PieceRenderer
                             key={piece.id}
-                            piece={isDragging ? { ...piece, shape: draggedPieceShape || piece.shape } : piece} 
-                            cellSize={CELL_SIZE} 
+                            piece={isDragging ? { ...piece, shape: draggedPieceShape || piece.shape } : piece}
+                            cellSize={CELL_SIZE}
                             isDragging={isDragging}
                             violatingCells={winState.violatingCells}
                             onPointerDown={isDragging ? undefined : (e: React.PointerEvent) => handlePointerDown(e, piece)}

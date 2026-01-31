@@ -1,26 +1,35 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Joyful/Game-like base colors */
+  --background: #bae6fd; /* Sky Blue 200 */
+  --foreground: #111827; /* Gray 900 */
+  
+  --color-grass-light: #4ade80; /* Green 400 */
+  --color-grass-dark: #22c55e; /* Green 500 */
+  --color-stone: #9ca3af; /* Gray 400 */
+  --color-stone-dark: #6b7280; /* Gray 500 */
+  
+  --font-pixel: var(--font-press-start-2p), monospace;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-pixel);
+  --font-mono: var(--font-pixel); /* Use pixel font for everything */
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #ffffff;
-    --foreground: #171717;
+    --background: #0f172a; /* Slate 900 (Night Sky) */
+    --foreground: #f3f4f6;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-pixel);
+  image-rendering: pixelated; /* Ensure images scaling stays crisp */
 }
