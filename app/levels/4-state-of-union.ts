@@ -2,7 +2,7 @@ import { Level, PieceType } from '../types';
 
 export default <Level>{
     id: '004',
-    name: 'State of Union',
+    name: 'State of the Union',
     width: 9,
     height: 5,
     grid: [
