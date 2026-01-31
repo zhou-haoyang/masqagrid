@@ -22,7 +22,7 @@ export const LEVELS: LevelMetadata[] = [
   },
   {
     id: '1',
-    name: 'Level 1',
+    name: 'Level 2',
     level: LEVEL_1,
   },
   {

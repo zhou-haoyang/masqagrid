@@ -26,67 +26,11 @@ export const LEVEL_1: Level = {
     disallowedSymbols: "🐶",
     initialPieces: [
         {
-            id: 'p4',
-            type: PieceType.INTERSECT,
-            color: '#fbbf24', // amber-400
-            position: { x: 2, y: 11 },
-            shape: [
-                [1],
-                [1],
-                [1]
-            ]
-        },
-        {
-            id: 'p6',
-            type: PieceType.INTERSECT,
-            color: '#fbbf24', // amber-400
-            position: { x: 4, y: 11 },
-            shape: [
-                [1],
-                [1],
-                [1]
-            ]
-        },
-        {
-            id: 'p1',
+            id: 'item-1769878435382-3q52o3b',
             type: PieceType.UNION,
-            color: '#3b82f6', // blue-500
-            position: { x: 6, y: 11 },
-            shape: [
-                [1, 1],
-                [1, 0]
-            ]
-        },
-        {
-            id: 'p2',
-            type: PieceType.UNION,
-            color: '#3b82f6', // blue-500
-            position: { x: 9, y: 11 },
-            shape: [
-                [1, 1, 1],
-                [0, 1, 0]
-            ]
-        },
-        {
-            id: 'p3',
-            type: PieceType.XOR,
-            color: '#ef4444', // red-500
-            position: { x: 13, y: 11 },
-            shape: [
-                [1, 1],
-                [1, 1]
-            ]
-        },
-        {
-            id: 'p5',
-            type: PieceType.XOR,
-            color: '#ef4444', // red-500
-            position: { x: 16, y: 11 },
-            shape: [
-                [1, 0],
-                [1, 0],
-                [1, 1]
-            ]
+            color: '#3b82f6',
+            position: { x: 0, y: 2 },
+            shape: [[1,1,1,0],[1,0,1,0],[0,0,0,0]]
         }
     ]
 };

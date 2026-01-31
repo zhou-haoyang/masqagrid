@@ -2,6 +2,12 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## The Golden Rule
+
+If there is ambiguity when understanding user's requests, or there are many ways to implement the same feature, 
+always ask the user before making any decision.
+
+
 ## Commands
 
 ```bash
