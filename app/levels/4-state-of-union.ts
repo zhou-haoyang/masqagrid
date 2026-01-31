@@ -1,17 +1,16 @@
 import { Level, PieceType } from '../types';
 
 export default <Level>{
-    id: '1-union-demo',
+    id: '004',
     name: 'State of Union',
-    width: 7,
-    height: 6,
+    width: 9,
+    height: 5,
     grid: [
-        "MMM####",
-        "MMM#ad#",
-        "MMM####",
-        "IIIIIII",
-        "IIIIIII",
-        "IIIIIII"
+        "###MMM###",
+        "#A#MMM#D#",
+        "###MMM###",
+        "IIIIIIIII",
+        "IIIIIIIII",
     ],
     mainSymbols: "🐶🐱🐱🐱🐱🐱🐱🐱🐶",
     allowedSymbols: "🐱",
@@ -20,16 +19,14 @@ export default <Level>{
         {
             id: 'item-1769880930324-dslhiu0',
             type: PieceType.UNION,
-            color: '#3b82f6',
-            position: { x: 0, y: 3 },
-            shape: [[1,1],[1,1]]
+            position: { x: 2, y: 3 },
+            shape: [[1, 1], [1, 1]]
         },
         {
             id: 'item-1769884872801-mf3a9za',
             type: PieceType.UNION,
-            color: '#3b82f6',
-            position: { x: 4, y: 3 },
-            shape: [[1,1],[1,1]]
+            position: { x: 5, y: 3 },
+            shape: [[1, 1], [1, 1]]
         }
     ]
 };

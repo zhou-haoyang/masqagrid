@@ -1,7 +1,7 @@
 import { Level, PieceType } from '../types';
 
 export default <Level>{
-    id: 'level-0',
+    id: '000',
     name: 'Test Rendering',
     width: 20,
     height: 15,

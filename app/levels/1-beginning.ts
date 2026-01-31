@@ -1,7 +1,7 @@
 import { Level, PieceType } from '../types';
 
 export default <Level>{
-    id: '1-beginning',
+    id: '001',
     name: 'Beginning',
     width: 7,
     height: 6,
@@ -20,7 +20,7 @@ export default <Level>{
         {
             id: 'item-1769880930324-dslhiu0',
             type: PieceType.BLOCKER,
-            position: { x: 0, y: 4 },
+            position: { x: 3, y: 4 },
             shape: [[1, 1], [1, 1]]
         }
     ]

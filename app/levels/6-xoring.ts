@@ -1,7 +1,7 @@
 import { Level, PieceType } from '../types';
 
 export default <Level>{
-    id: 'level-editor-1769888603583',
+    id: '006',
     name: 'XORing',
     width: 7,
     height: 8,

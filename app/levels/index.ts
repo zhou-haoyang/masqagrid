@@ -36,7 +36,7 @@ export const LEVELS: LevelMetadata[] = levelModules.keys().map((fileName: string
     name: level.name,
     level: level,
   };
-});
+}).sort((a, b) => a.id.localeCompare(b.id));
 
 // Helper to get level by ID
 export function getLevelById(id: string): Level | null {

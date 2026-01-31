@@ -25,7 +25,7 @@ export const LevelSelector: React.FC<LevelSelectorProps> = ({
       >
         {LEVELS.map((level) => (
           <option key={level.id} value={level.id}>
-            {level.name}
+            {LEVELS.findIndex((l) => l.id === level.id)}. {level.name}
           </option>
         ))}
       </select>

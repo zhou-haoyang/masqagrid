@@ -1,7 +1,7 @@
 import { Level, PieceType } from '../types';
 
 export default <Level>{
-    id: '1-xor-demo',
+    id: '007',
     name: 'This or That?',
     width: 8,
     height: 9,

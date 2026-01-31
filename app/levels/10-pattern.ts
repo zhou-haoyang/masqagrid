@@ -1,19 +1,19 @@
 import { Level, PieceType } from '../types';
 
 export default <Level>{
-    id: '2',
+    id: '010',
     name: 'Break the Pattern',
-    width: 6,
+    width: 7,
     height: 6,
     grid: [
-        "MMMM##",
-        "MMMM#A",
-        "MMMM##",
-        "MMMM##",
-        "IIII#D",
-        "IIII##"
+        "MMMM###",
+        "MMMM#A#",
+        "MMMM###",
+        "MMMM###",
+        "IIII#D#",
+        "IIII###"
     ],
-    mainSymbols: "🐶🐱🐱🐶🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐶",
+    mainSymbols: "🐶🐱🐱🐶🐱🐱🐱🐱🐱🐱🐱🐱🐶🐱🐱🐶",
     allowedSymbols: "🐱",
     disallowedSymbols: "🐶",
     initialPieces: [

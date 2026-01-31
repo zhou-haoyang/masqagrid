@@ -83,10 +83,17 @@ export function manageCollision(allPieces: Piece[], droppedPiece: Piece, grid?: 
         }
     }
 
-    // 1. Blocker Check (Diff Type Overlap)
-    const blockers = allPieces.filter(p =>
-        p.type !== type && doPiecesOverlap(p, droppedPiece)
-    );
+    // 1. Blocker Check (Diff Type Overlap OR any Blocker Overlap)
+    const blockers = allPieces.filter(p => {
+        const areBothRegular = p.type !== PieceType.BLOCKER && type !== PieceType.BLOCKER;
+        if (areBothRegular) {
+            // Regular pieces (UNION, XOR, INTERSECT) block each other if different types
+            return p.type !== type && doPiecesOverlap(p, droppedPiece);
+        } else {
+            // If either is a BLOCKER, they block EVERYTHING they overlap with
+            return doPiecesOverlap(p, droppedPiece);
+        }
+    });
     if (blockers.length > 0) return { success: false, reason: 'BLOCKER' };
 
     // 2. Merge Logic (Same Type Connect)
