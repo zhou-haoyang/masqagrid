@@ -45,10 +45,27 @@ export default function LevelEditor() {
 
   const canvasRef = useRef<HTMLDivElement>(null);
 
-  // Initialize grid when dimensions change
+  // Adjust grid when dimensions change while preserving existing data
   useEffect(() => {
-    setGrid(Array(height).fill('.'.repeat(width)));
+    setGrid(prevGrid => {
+      const newGrid = Array(height).fill('.'.repeat(width));
+      
+      prevGrid.forEach((row, y) => {
+        if (y < height) {
+          const newRow = row.slice(0, width).padEnd(width, '.');
+          newGrid[y] = newRow;
+        }
+      });
+      
+      return newGrid;
+    });
   }, [width, height]);
+
+  const handleClearGrid = () => {
+    if (confirm('Are you sure you want to clear the entire grid?')) {
+      setGrid(Array(height).fill('.'.repeat(width)));
+    }
+  };
 
   // Paint cell with selected brush
   const paintCell = (x: number, y: number) => {
@@ -326,6 +343,15 @@ export default function LevelEditor() {
                   max={50}
                 />
               </div>
+            </div>
+
+            <div className="mt-4">
+              <button
+                onClick={handleClearGrid}
+                className="w-full px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded transition-colors text-sm font-medium"
+              >
+                Clear Grid
+              </button>
             </div>
           </div>
 
