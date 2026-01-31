@@ -59,7 +59,7 @@ export default function LevelEditor() {
       
       return newGrid;
     });
-  }, [width, height]);
+  }, [width, height, grid]);
 
   const handleClearGrid = () => {
     if (confirm('Are you sure you want to clear the entire grid?')) {
@@ -240,6 +240,7 @@ export default function LevelEditor() {
   };
 
   const handleLoadLevel = (level: Level) => {
+    console.log('Loading level:', level);
     setWidth(level.width);
     setHeight(level.height);
     setGrid(level.grid);
@@ -430,7 +431,9 @@ export default function LevelEditor() {
                   onPointerUp={handlePiecePointerUp}
                   onContextMenu={e => handlePieceContextMenu(e, piece)}
                 >
-                  <PieceRenderer piece={piece} cellSize={CELL_SIZE} />
+                  <PieceRenderer
+                    piece={{ ...piece, position: { x: 0, y: 0 } }}
+                    cellSize={CELL_SIZE} />
                 </div>
               );
             })}

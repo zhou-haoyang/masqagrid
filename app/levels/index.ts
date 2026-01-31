@@ -3,6 +3,7 @@ import { Level } from '../types';
 // Import all level files
 import { LEVEL_0 } from './0';
 import { LEVEL_1 } from './1';
+import { LEVEL_1_1 } from './1_1';
 import { LEVEL_2 } from './2';
 import { LEVEL_3 } from './3';
 
@@ -15,6 +16,11 @@ export interface LevelMetadata {
 
 // Registry of all available levels
 export const LEVELS: LevelMetadata[] = [
+  {
+    id: '1_1',
+    name: 'Level 1_1',
+    level: LEVEL_1_1,
+  },
   {
     id: '0',
     name: 'Level 0',

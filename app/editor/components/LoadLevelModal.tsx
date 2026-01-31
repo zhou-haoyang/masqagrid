@@ -37,8 +37,7 @@ export function LoadLevelModal({ onClose, onLoad }: LoadLevelModalProps) {
               >
                 <div className="font-medium text-gray-900">{levelMeta.name}</div>
                 <div className="text-xs text-gray-600">
-                  {levelMeta.level.width}×{levelMeta.level.height} grid,{' '}
-                  {levelMeta.level.regions.length} regions, {levelMeta.level.initialPieces.length}{' '}
+                  {levelMeta.level.width}×{levelMeta.level.height} grid,{levelMeta.level.initialPieces.length}{' '}
                   pieces
                 </div>
               </button>
