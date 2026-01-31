@@ -2,7 +2,7 @@ import { Level, PieceType } from '../types';
 
 export default <Level>{
     id: '1-beginning',
-	name: 'Beginning',
+    name: 'Beginning',
     width: 7,
     height: 6,
     grid: [
@@ -13,16 +13,15 @@ export default <Level>{
         "IIIIIII",
         "IIIIIII"
     ],
-    mainSymbols: "🐶🐱🐱🐱🐱🐶🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱",
+    mainSymbols: "🐱🐱🐱🐱🐱🐶🐶🐱🐱🐶🐶🐱🐱🐱🐱🐱",
     allowedSymbols: "🐱",
     disallowedSymbols: "🐶",
     initialPieces: [
         {
             id: 'item-1769880930324-dslhiu0',
-            type: PieceType.UNION,
-            color: '#3b82f6',
+            type: PieceType.BLOCKER,
             position: { x: 0, y: 4 },
-            shape: [[1,1],[1,1]]
+            shape: [[1, 1], [1, 1]]
         }
     ]
 };

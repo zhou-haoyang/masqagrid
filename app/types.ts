@@ -15,7 +15,7 @@ export interface Piece {
     type: PieceType;
     shape: number[][]; // 0/1 matrix
     position: Position; // Top-left coordinate on global grid
-    color: string;
+    color?: string;
 }
 
 export type SymbolGrid = string[][];

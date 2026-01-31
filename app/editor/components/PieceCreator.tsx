@@ -2,19 +2,13 @@ import { useState } from 'react';
 import { PieceType, Piece } from '@/app/types';
 import { X, Plus, Minus } from 'lucide-react';
 import { generateId } from '../lib/grid-helpers';
+import { getPieceColor, PIECE_COLORS } from '@/app/lib/piece-utils';
 
 interface PieceCreatorProps {
   onClose: () => void;
   onCreatePiece: (piece: Piece) => void;
   editingPiece?: Piece | null;
 }
-
-const DEFAULT_COLORS: Record<PieceType, string> = {
-  [PieceType.UNION]: '#3b82f6',
-  [PieceType.XOR]: '#ef4444',
-  [PieceType.INTERSECT]: '#fbbf24',
-  [PieceType.BLOCKER]: '#6b7280',
-};
 
 export function PieceCreator({ onClose, onCreatePiece, editingPiece }: PieceCreatorProps) {
   const [pieceType, setPieceType] = useState<PieceType>(
@@ -23,7 +17,6 @@ export function PieceCreator({ onClose, onCreatePiece, editingPiece }: PieceCrea
   const [shape, setShape] = useState<number[][]>(
     editingPiece?.shape || [[1, 1], [1, 1]]
   );
-  const [color, setColor] = useState(editingPiece?.color || DEFAULT_COLORS[PieceType.UNION]);
 
   const toggleCell = (row: number, col: number) => {
     setShape((prev) =>
@@ -56,14 +49,12 @@ export function PieceCreator({ onClose, onCreatePiece, editingPiece }: PieceCrea
 
   const handleTypeChange = (newType: PieceType) => {
     setPieceType(newType);
-    setColor(DEFAULT_COLORS[newType]);
   };
 
   const handleCreate = () => {
     const piece: Piece = {
       id: editingPiece?.id || generateId('piece'),
       type: pieceType,
-      color,
       shape,
       position: editingPiece?.position || { x: 0, y: 0 },
     };
@@ -101,7 +92,7 @@ export function PieceCreator({ onClose, onCreatePiece, editingPiece }: PieceCrea
                     : 'border-gray-200 hover:border-gray-300'
                 }`}
               >
-                <div className="font-medium" style={{ color: DEFAULT_COLORS[PieceType.UNION] }}>
+                <div className="font-medium" style={{ color: PIECE_COLORS[PieceType.UNION] }}>
                   UNION (OR)
                 </div>
                 <div className="text-xs text-gray-600">Blue - Adds coverage</div>
@@ -114,7 +105,7 @@ export function PieceCreator({ onClose, onCreatePiece, editingPiece }: PieceCrea
                     : 'border-gray-200 hover:border-gray-300'
                 }`}
               >
-                <div className="font-medium" style={{ color: DEFAULT_COLORS[PieceType.XOR] }}>
+                <div className="font-medium" style={{ color: PIECE_COLORS[PieceType.XOR] }}>
                   XOR (Toggle)
                 </div>
                 <div className="text-xs text-gray-600">Red - Toggles coverage</div>
@@ -127,7 +118,7 @@ export function PieceCreator({ onClose, onCreatePiece, editingPiece }: PieceCrea
                     : 'border-gray-200 hover:border-gray-300'
                 }`}
               >
-                <div className="font-medium" style={{ color: DEFAULT_COLORS[PieceType.INTERSECT] }}>
+                <div className="font-medium" style={{ color: PIECE_COLORS[PieceType.INTERSECT] }}>
                   INTERSECT (AND)
                 </div>
                 <div className="text-xs text-gray-600">Amber - Intersection only</div>
@@ -140,7 +131,7 @@ export function PieceCreator({ onClose, onCreatePiece, editingPiece }: PieceCrea
                     : 'border-gray-200 hover:border-gray-300'
                 }`}
               >
-                <div className="font-medium" style={{ color: DEFAULT_COLORS[PieceType.BLOCKER] }}>
+                <div className="font-medium" style={{ color: PIECE_COLORS[PieceType.BLOCKER] }}>
                   BLOCKER
                 </div>
                 <div className="text-xs text-gray-600">Gray - Blocks overlaps</div>
@@ -227,8 +218,8 @@ export function PieceCreator({ onClose, onCreatePiece, editingPiece }: PieceCrea
                         onClick={() => toggleCell(r, c)}
                         className="w-10 h-10 rounded border-2 transition-all"
                         style={{
-                          backgroundColor: cell === 1 ? color : 'white',
-                          borderColor: cell === 1 ? color : '#d1d5db',
+                          backgroundColor: cell === 1 ? getPieceColor(pieceType) : 'white',
+                          borderColor: cell === 1 ? getPieceColor(pieceType) : '#d1d5db',
                         }}
                       />
                     ))
@@ -239,19 +230,6 @@ export function PieceCreator({ onClose, onCreatePiece, editingPiece }: PieceCrea
                 </div>
               </div>
             </div>
-          </div>
-
-          {/* Color picker */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Color (optional override)
-            </label>
-            <input
-              type="color"
-              value={color}
-              onChange={(e) => setColor(e.target.value)}
-              className="w-20 h-10 rounded border border-gray-300 cursor-pointer"
-            />
           </div>
         </div>
 

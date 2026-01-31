@@ -226,8 +226,8 @@ export default function LevelEditor() {
     grid.forEach(row => {
       for (const cell of row) {
         if (cell === 'M') mCount++;
-        if (cell === 'A') aCount++;
-        if (cell === 'D') dCount++;
+        if (cell === 'A' || cell === 'a') aCount++;
+        if (cell === 'D' || cell === 'd') dCount++;
       }
     });
 

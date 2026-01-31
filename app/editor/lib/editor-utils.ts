@@ -35,8 +35,8 @@ export function validateLevel(level: Level): ValidationResult {
   level.grid.forEach(row => {
     for (const cell of row) {
       if (cell === 'M') mCount++;
-      if (cell === 'A') aCount++;
-      if (cell === 'D') dCount++;
+      if (cell === 'A' || cell === 'a') aCount++;
+      if (cell === 'D' || cell === 'd') dCount++;
       if (cell === 'I') iCount++;
     }
   });
@@ -71,21 +71,21 @@ export function validateLevel(level: Level): ValidationResult {
   }
 
   // Check symbol counts match cell counts
-  if ([...level.mainSymbols].length !== mCount) {
+  if ([...level.mainSymbols.replace(/[\n\r]/g, '')].length !== mCount) {
     errors.push({
       type: 'symbol-mismatch',
       message: `Main symbols count (${[...level.mainSymbols].length}) doesn't match M cells (${mCount})`,
     });
   }
 
-  if ([...level.allowedSymbols].length !== aCount) {
+  if ([...level.allowedSymbols.replace(/[\n\r]/g, '')].length !== aCount) {
     errors.push({
       type: 'symbol-mismatch',
       message: `Allowed symbols count (${[...level.allowedSymbols].length}) doesn't match A cells (${aCount})`,
     });
   }
 
-  if ([...level.disallowedSymbols].length !== dCount) {
+  if ([...level.disallowedSymbols.replace(/[\n\r]/g, '')].length !== dCount) {
     errors.push({
       type: 'symbol-mismatch',
       message: `Disallowed symbols count (${[...level.disallowedSymbols].length}) doesn't match D cells (${dCount})`,
@@ -155,7 +155,6 @@ export function generateLevelCode(level: Level, levelNumber: number | string): s
       return `        {
             id: '${piece.id}',
             type: PieceType.${piece.type},
-            color: '${piece.color}',
             position: { x: ${piece.position.x}, y: ${piece.position.y} },
             shape: ${JSON.stringify(piece.shape)}
         }`;
@@ -172,9 +171,9 @@ export default <Level>{
     grid: [
 ${gridCode}
     ],
-    mainSymbols: "${level.mainSymbols}",
-    allowedSymbols: "${level.allowedSymbols}",
-    disallowedSymbols: "${level.disallowedSymbols}",
+    mainSymbols: "${level.mainSymbols.replace(/\n/g, '')}",
+    allowedSymbols: "${level.allowedSymbols.replace(/\n/g, '')}",
+    disallowedSymbols: "${level.disallowedSymbols.replace(/\n/g, '')}",
     initialPieces: [
 ${piecesCode}
     ]

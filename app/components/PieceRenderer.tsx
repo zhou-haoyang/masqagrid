@@ -1,5 +1,6 @@
 import React from 'react';
 import { Piece } from '../types';
+import { getPieceColor } from '../lib/piece-utils';
 
 interface PieceRendererProps {
     piece: Piece;
@@ -10,6 +11,8 @@ interface PieceRendererProps {
 }
 
 export const PieceRenderer: React.FC<PieceRendererProps> = ({ piece, cellSize, isDragging, onPointerDown, style }) => {
+    const displayColor = getPieceColor(piece.type);
+
     return (
         <div
             onPointerDown={onPointerDown}
@@ -54,7 +57,7 @@ export const PieceRenderer: React.FC<PieceRendererProps> = ({ piece, cellSize, i
                             <div key={`${r}-${c}`} style={{ width: '100%', height: '100%' }}>
                                 <div
                                     style={{
-                                        backgroundColor: piece.color,
+                                        backgroundColor: displayColor,
                                         width: '100%',
                                         height: '100%',
                                         boxSizing: 'border-box',
