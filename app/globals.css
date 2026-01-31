@@ -2,14 +2,47 @@
 
 :root {
   /* Joyful/Game-like base colors */
-  --background: #bae6fd; /* Sky Blue 200 */
-  --foreground: #111827; /* Gray 900 */
-  
-  --color-grass-light: #4ade80; /* Green 400 */
-  --color-grass-dark: #22c55e; /* Green 500 */
-  --color-stone: #9ca3af; /* Gray 400 */
-  --color-stone-dark: #6b7280; /* Gray 500 */
-  
+  --background: #bae6fd;
+  /* Sky Blue 200 */
+  --foreground: #111827;
+  /* Gray 900 */
+
+  --color-grass-light: #4ade80;
+  /* Green 400 */
+  --color-grass-dark: #22c55e;
+  /* Green 500 */
+  --color-stone: #9ca3af;
+  /* Gray 400 */
+  --color-stone-dark: #6b7280;
+  /* Gray 500 */
+
+  /* Game Elements Light */
+  --color-region-sky: #e0f2fe;
+  /* Sky 100 */
+  --color-region-grass: #bbf7d0;
+  /* Green 200 */
+  --color-region-lava: #fecaca;
+  /* Red 200 */
+  --color-region-wood: #ffedd5;
+  /* Orange 100 */
+  --color-wall: #374151;
+  /* Gray 700 */
+  --color-wall-accent: #1f2937;
+  /* Gray 800 */
+
+  --panel-bg: #ffffff;
+  /* White */
+  --panel-border: #111827;
+  /* Gray 900 */
+  --panel-text: #111827;
+  /* Gray 900 */
+
+  --grid-line: #e5e5e5;
+  /* Neutral 200 */
+
+  --piece-border: #111827;
+  /* Gray 900 */
+
   --font-pixel: var(--font-press-start-2p), monospace;
 }
 
@@ -17,19 +50,54 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-pixel);
-  --font-mono: var(--font-pixel); /* Use pixel font for everything */
+  --font-mono: var(--font-pixel);
+  /* Use pixel font for everything */
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #bae6fd; /* Sky Blue 200 */
-    --foreground: #111827; /* Gray 900 */
-  }
+/* Dark mode overrides */
+.dark {
+  --background: #0f172a;
+  /* Slate 900 (Night Sky) */
+  --foreground: #f3f4f6;
+
+  --color-grass-light: #15803d;
+  /* Green 700 */
+  --color-grass-dark: #166534;
+  /* Green 800 */
+  --color-stone: #4b5563;
+  /* Gray 600 */
+  --color-stone-dark: #374151;
+  /* Gray 700 */
+
+  /* Game Elements Dark */
+  --color-region-sky: #1e293b;
+  /* Slate 800 - Night sky */
+  --color-region-grass: #14532d;
+  /* Green 900 */
+  --color-region-lava: #7f1d1d;
+  /* Red 900 */
+  --color-region-wood: #7c2d12;
+  /* Orange 900 */
+  --color-wall: #020617;
+  /* Slate 950 */
+  --color-wall-accent: #1e293b;
+  /* Slate 800 */
+
+  --panel-bg: #1e293b;
+  /* Slate 800 */
+  --panel-border: #94a3b8;
+  /* Slate 400 */
+  --panel-text: #f3f4f6;
+  /* Gray 100 */
+
+  --grid-line: #334155;
+  /* Slate 700 */
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-pixel);
-  image-rendering: pixelated; /* Ensure images scaling stays crisp */
+  image-rendering: pixelated;
+  /* Ensure images scaling stays crisp */
 }
