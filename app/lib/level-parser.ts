@@ -19,9 +19,9 @@ export function parseLevel(level: Level): ParsedLevel {
     const symbolMap = new Map<string, string>();
     const regionMap = new Map<string, { cells: Array<{x: number, y: number}>, type: Region['type'] }>();
     
-    const mainSymbolsArr = [...mainSymbols];
-    const allowedSymbolsArr = [...allowedSymbols];
-    const disallowedSymbolsArr = [...disallowedSymbols];
+    const mainSymbolsArr = [...mainSymbols.replace(/[\n\r]/g, '')];
+    const allowedSymbolsArr = [...allowedSymbols.replace(/[\n\r]/g, '')];
+    const disallowedSymbolsArr = [...disallowedSymbols.replace(/[\n\r]/g, '')];
     
     let mainIndex = 0;
     let allowedIndex = 0;

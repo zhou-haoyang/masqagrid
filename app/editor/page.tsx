@@ -17,8 +17,8 @@ export default function LevelEditor() {
   // Level data
   const [id, setId] = useState('level-editor-' + Date.now());
   const [name, setName] = useState('Unnamed Level');
-  const [width, setWidth] = useState(20);
-  const [height, setHeight] = useState(15);
+  const [width, setWidth] = useState(7);
+  const [height, setHeight] = useState(7);
   const [grid, setGrid] = useState<string[]>(Array(15).fill('.'.repeat(20)));
   const [mainSymbols, setMainSymbols] = useState('');
   const [allowedSymbols, setAllowedSymbols] = useState('');
@@ -61,7 +61,7 @@ export default function LevelEditor() {
       
       return newGrid;
     });
-  }, [width, height, grid]);
+  }, [width, height]);
 
   const handleClearGrid = () => {
     if (confirm('Are you sure you want to clear the entire grid?')) {
@@ -231,11 +231,15 @@ export default function LevelEditor() {
       }
     });
 
+    const mainClean = mainSymbols.replace(/[\n\r]/g, '');
+    const allowedClean = allowedSymbols.replace(/[\n\r]/g, '');
+    const disallowedClean = disallowedSymbols.replace(/[\n\r]/g, '');
+
     const errors = [];
     if (mCount === 0) errors.push('No Main (M) cells defined');
-    if ([...mainSymbols].length !== mCount) errors.push(`Main symbols count (${[...mainSymbols].length}) doesn't match M cells (${mCount})`);
-    if ([...allowedSymbols].length !== aCount) errors.push(`Allowed symbols count (${[...allowedSymbols].length}) doesn't match A cells (${aCount})`);
-    if ([...disallowedSymbols].length !== dCount) errors.push(`Disallowed symbols count (${[...disallowedSymbols].length}) doesn't match D cells (${dCount})`);
+    if ([...mainClean].length !== mCount) errors.push(`Main symbols count (${[...mainClean].length}) doesn't match M cells (${mCount})`);
+    if ([...allowedClean].length !== aCount) errors.push(`Allowed symbols count (${[...allowedClean].length}) doesn't match A/a cells (${aCount})`);
+    if ([...disallowedClean].length !== dCount) errors.push(`Disallowed symbols count (${[...disallowedClean].length}) doesn't match D/d cells (${dCount})`);
 
     if (errors.length > 0) {
       setValidationMessage(errors.join('\\n'));
@@ -393,7 +397,8 @@ export default function LevelEditor() {
             style={{
               width: width * CELL_SIZE,
               height: height * CELL_SIZE,
-              cursor: isPainting ? 'crosshair' : 'default'
+              cursor: isPainting ? 'crosshair' : 'default',
+              boxSizing: 'content-box'
             }}
             onPointerDown={handleCanvasPointerDown}
             onPointerMove={handleCanvasPointerMove}
@@ -404,6 +409,9 @@ export default function LevelEditor() {
             {(() => {
               // Count indices for each cell type in reading order
               let mIndex = 0, aIndex = 0, dIndex = 0;
+              const mClean = [...mainSymbols.replace(/[\n\r]/g, '')];
+              const aClean = [...allowedSymbols.replace(/[\n\r]/g, '')];
+              const dClean = [...disallowedSymbols.replace(/[\n\r]/g, '')];
 
               return grid.map((row, y) =>
                 row.split('').map((cell, x) => {
@@ -413,18 +421,18 @@ export default function LevelEditor() {
 
                   if (cell === 'M') {
                     bgColor = '#93c5fd'; // blue-300
-                    symbol = [...mainSymbols][mIndex] || '';
+                    symbol = mClean[mIndex] || '';
                     mIndex++;
                   } else if (cell === 'A' || cell === 'a') {
                     bgColor = '#86efac'; // green-300
-                    symbol = [...allowedSymbols][aIndex] || '';
+                    symbol = aClean[aIndex] || '';
                     aIndex++;
                     if (cell === 'a') {
                       bgImage = 'repeating-linear-gradient(45deg, rgba(0,0,0,0.1) 0, rgba(0,0,0,0.1) 2px, transparent 2px, transparent 10px)';
                     }
                   } else if (cell === 'D' || cell === 'd') {
                     bgColor = '#fca5a5'; // red-300
-                    symbol = [...disallowedSymbols][dIndex] || '';
+                    symbol = dClean[dIndex] || '';
                     dIndex++;
                     if (cell === 'd') {
                       bgImage = 'repeating-linear-gradient(45deg, rgba(0,0,0,0.1) 0, rgba(0,0,0,0.1) 2px, transparent 2px, transparent 10px)';
@@ -546,7 +554,7 @@ export default function LevelEditor() {
                 placeholder="Enter symbols for M cells in reading order"
               />
               <div className="text-xs text-gray-500 mt-1">
-                Length: {[...mainSymbols].length}
+                Length: {[...mainSymbols.replace(/[\n\r]/g, '')].length}
               </div>
             </div>
 
@@ -562,7 +570,7 @@ export default function LevelEditor() {
                 placeholder="Enter symbols for A cells"
               />
               <div className="text-xs text-gray-500 mt-1">
-                Length: {[...allowedSymbols].length}
+                Length: {[...allowedSymbols.replace(/[\n\r]/g, '')].length}
               </div>
             </div>
 
@@ -578,7 +586,7 @@ export default function LevelEditor() {
                 placeholder="Enter symbols for D cells"
               />
               <div className="text-xs text-gray-500 mt-1">
-                Length: {[...disallowedSymbols].length}
+                Length: {[...disallowedSymbols.replace(/[\n\r]/g, '')].length}
               </div>
             </div>
           </div>

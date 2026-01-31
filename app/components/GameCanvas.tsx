@@ -391,7 +391,11 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
             <div
                 ref={containerRef}
                 className="relative bg-white shadow-xl rounded-lg overflow-hidden border border-gray-200"
-                style={{ width: level.width * CELL_SIZE, height: level.height * CELL_SIZE }}
+                style={{ 
+                    width: level.width * CELL_SIZE, 
+                    height: level.height * CELL_SIZE,
+                    boxSizing: 'content-box'
+                }}
                 onPointerMove={handlePointerMove}
                 onPointerUp={handlePointerUp}
             >
