@@ -35,9 +35,9 @@ export interface Level {
     name: string;
     width: number;
     height: number;
-    grid: string[]; // ASCII Grid: '.'=Empty, '#'=Blocked, 'M'=Main, 'A'=Allowed, 'D'=Disallowed, 'I'=Inventory
+    grid: string[]; // ASCII Grid: '.'=Empty, '#'=Blocked, 'M'=Main, 'A'=Allowed, 'D'=Disallowed, 'a'=Blocked Allowed, 'd'=Blocked Disallowed, 'I'=Inventory
     mainSymbols: string; // Symbols for M cells in reading order
-    allowedSymbols: string; // Symbols for A cells in reading order
-    disallowedSymbols: string; // Symbols for D cells in reading order
+    allowedSymbols: string; // Symbols for A/a cells in reading order
+    disallowedSymbols: string; // Symbols for D/d cells in reading order
     initialPieces: Piece[];
 }

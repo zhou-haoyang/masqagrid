@@ -8,11 +8,11 @@ export default <Level>{
     grid: [
         "....................",
         "....................",
-        "..MMMMMM..AA........",
+        "..MMMMMM..AA....a...",
         "..MMMMMM............",
         "..MMMMMM............",
         "..MMMMMM............",
-        "..MMMMMM..DD........",
+        "..MMMMMM..DD....d...",
         "..MMMMMM............",
         "....................",
         "##..................",
@@ -23,8 +23,8 @@ export default <Level>{
         "...................."
     ],
     mainSymbols: "🐱B🐱C🐱BB🐱C🐱B🐱C🐱B🐱C🐱B🐱C🐱B🐱C🐱B🐱C🐱B🐱C🐱B🐱CX",
-    allowedSymbols: "🐱B  ",
-    disallowedSymbols: "CX  ",
+    allowedSymbols: "🐱B A ",
+    disallowedSymbols: "CX B ",
     initialPieces: [
         // Spaced out inventory: x=2, 4, 6, 9, 13, 16 
         {

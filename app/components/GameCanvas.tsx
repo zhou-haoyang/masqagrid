@@ -19,7 +19,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const [pieces, setPieces] = useState<Piece[]>(initialPiecesWithIds(level.initialPieces));
     const [history, setHistory] = useState<Piece[][]>([]);
-    const [winState, setWinState] = useState<WinState>({ isWin: false, violations: [] }); // [NEW]
+    const [winState, setWinState] = useState<WinState>({ isWin: false, violations: [], violatingCells: [] }); // [NEW]
     
     // Parse level grid into runtime structures
     const parsed = parseLevel(level);
@@ -281,7 +281,17 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
                     bgColor = '#ffffff';
                     bgImage = 'repeating-linear-gradient(45deg, #e5e7eb 0, #e5e7eb 2px, #ffffff 2px, #ffffff 10px)';
                     border = '1px solid #e5e5e5';
+                } else if (cellType === 'a') {
+                    bgColor = '#dcfce7'; // Green-100
+                    bgImage = 'repeating-linear-gradient(45deg, rgba(0,0,0,0.05) 0, rgba(0,0,0,0.05) 2px, transparent 2px, transparent 10px)';
+                    border = '1px solid rgba(0,0,0,0.1)';
+                } else if (cellType === 'd') {
+                    bgColor = '#fee2e2'; // Red-100
+                    bgImage = 'repeating-linear-gradient(45deg, rgba(0,0,0,0.05) 0, rgba(0,0,0,0.05) 2px, transparent 2px, transparent 10px)';
+                    border = '1px solid rgba(0,0,0,0.1)';
                 }
+                
+                const isViolating = winState.violatingCells.some(c => c.x === x && c.y === y);
                 
                 if (cellType !== '.') {
                     cells.push(
@@ -294,14 +304,16 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
                                 height: CELL_SIZE,
                                 backgroundColor: bgColor,
                                 backgroundImage: bgImage,
-                                border: border,
+                                border: isViolating ? '2px solid #ef4444' : border,
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 fontSize: '20px',
                                 fontWeight: 'bold',
                                 color: '#374151',
-                                zIndex: cellType === '#' ? 5 : 0
+                                zIndex: isViolating ? 6 : (cellType === '#' ? 5 : 0),
+                                boxSizing: 'border-box',
+                                animation: isViolating ? 'pulsate-red 2s infinite ease-in-out' : 'none'
                             }}
                         >
                             {symbol}
@@ -317,6 +329,13 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
 
     return (
         <div className="flex flex-col items-center gap-4 p-8 select-none relative">
+            <style dangerouslySetInnerHTML={{ __html: `
+                @keyframes pulsate-red {
+                    0% { border-color: rgba(239, 68, 68, 0.4); box-shadow: inset 0 0 4px rgba(239, 68, 68, 0.4); }
+                    50% { border-color: rgba(239, 68, 68, 1); box-shadow: inset 0 0 10px rgba(239, 68, 68, 0.4); }
+                    100% { border-color: rgba(239, 68, 68, 0.4); box-shadow: inset 0 0 4px rgba(239, 68, 68, 0.4); }
+                }
+            `}} />
             {/* Status Panel */}
             <div className={`fixed top-4 right-4 p-4 rounded-lg shadow-lg border transition-all z-50 ${winState.isWin ? 'bg-green-50 border-green-200' : 'bg-white border-gray-200'
                 }`}>

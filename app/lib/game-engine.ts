@@ -71,8 +71,8 @@ export function manageCollision(allPieces: Piece[], droppedPiece: Piece, grid?: 
                     // Check bounds
                     if (gy >= 0 && gy < grid.length && gx >= 0 && gx < grid[gy].length) {
                         const cellType = grid[gy][gx];
-                        // Blocked cells: '#' (explicit block) and '.' (empty/void)
-                        if (cellType === '#') {
+                        // Blocked cells: '#' (explicit block), 'a' (blocked allowed), 'd' (blocked disallowed)
+                        if (cellType === '#' || cellType === 'a' || cellType === 'd') {
                             return { success: false, reason: 'BLOCKED_CELL' };
                         }
                         // Valid placement cells: 'M', 'A', 'D', 'I'

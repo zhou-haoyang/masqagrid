@@ -3,17 +3,17 @@ import { Level, PieceType } from '../types';
 export default <Level>{
     id: '1-beginning',
 	name: 'Beginning',
-    width: 6,
+    width: 7,
     height: 6,
     grid: [
-        "MMMM##",
-        "MMMM#A",
-        "MMMM##",
-        "MMMM##",
-        "IIII#D",
-        "IIII##"
+        "MMMM###",
+        "MMMM#a#",
+        "MMMM#d#",
+        "MMMM###",
+        "IIIIIII",
+        "IIIIIII"
     ],
-    mainSymbols: "🐶🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱",
+    mainSymbols: "🐶🐱🐱🐱🐱🐶🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱",
     allowedSymbols: "🐱",
     disallowedSymbols: "🐶",
     initialPieces: [

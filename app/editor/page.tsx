@@ -11,7 +11,7 @@ import { LoadLevelModal } from './components/LoadLevelModal';
 import { PieceRenderer } from '../components/PieceRenderer';
 import { pixelToGrid, generateId, CELL_SIZE } from './lib/grid-helpers';
 
-type BrushType = '.' | '#' | 'M' | 'A' | 'D' | 'I';
+type BrushType = '.' | '#' | 'M' | 'A' | 'D' | 'I' | 'a' | 'd';
 
 export default function LevelEditor() {
   // Level data
@@ -268,7 +268,9 @@ export default function LevelEditor() {
     { type: '#', label: 'Blocked', icon: Hash, color: 'bg-gray-600 text-white' },
     { type: 'M', label: 'Main', icon: Grid3x3, color: 'bg-blue-400 text-white' },
     { type: 'A', label: 'Allowed', icon: CheckSquare, color: 'bg-green-400 text-white' },
+    { type: 'a', label: 'B-Allowed', icon: CheckSquare, color: 'bg-green-600 text-white' },
     { type: 'D', label: 'Disallowed', icon: XSquare, color: 'bg-red-400 text-white' },
+    { type: 'd', label: 'B-Disallowed', icon: XSquare, color: 'bg-red-600 text-white' },
     { type: 'I', label: 'Inventory', icon: Package, color: 'bg-purple-400 text-white' },
   ];
 
@@ -406,20 +408,27 @@ export default function LevelEditor() {
               return grid.map((row, y) =>
                 row.split('').map((cell, x) => {
                   let bgColor = 'transparent';
+                  let bgImage = 'none';
                   let symbol = '';
 
                   if (cell === 'M') {
                     bgColor = '#93c5fd'; // blue-300
                     symbol = [...mainSymbols][mIndex] || '';
                     mIndex++;
-                  } else if (cell === 'A') {
+                  } else if (cell === 'A' || cell === 'a') {
                     bgColor = '#86efac'; // green-300
                     symbol = [...allowedSymbols][aIndex] || '';
                     aIndex++;
-                  } else if (cell === 'D') {
+                    if (cell === 'a') {
+                      bgImage = 'repeating-linear-gradient(45deg, rgba(0,0,0,0.1) 0, rgba(0,0,0,0.1) 2px, transparent 2px, transparent 10px)';
+                    }
+                  } else if (cell === 'D' || cell === 'd') {
                     bgColor = '#fca5a5'; // red-300
                     symbol = [...disallowedSymbols][dIndex] || '';
                     dIndex++;
+                    if (cell === 'd') {
+                      bgImage = 'repeating-linear-gradient(45deg, rgba(0,0,0,0.1) 0, rgba(0,0,0,0.1) 2px, transparent 2px, transparent 10px)';
+                    }
                   } else if (cell === 'I') {
                     bgColor = '#d8b4fe'; // purple-300
                   } else if (cell === '#') {
@@ -436,6 +445,7 @@ export default function LevelEditor() {
                         width: CELL_SIZE,
                         height: CELL_SIZE,
                         backgroundColor: bgColor,
+                        backgroundImage: bgImage,
                         border: '1px solid rgba(0,0,0,0.05)',
                         display: 'flex',
                         alignItems: 'center',

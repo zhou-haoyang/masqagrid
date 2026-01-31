@@ -32,7 +32,7 @@ export function parseLevel(level: Level): ParsedLevel {
         for (let x = 0; x < width; x++) {
             const cell = gridCells[y]?.[x] || '.';
             
-            // Cells that need symbols: M, A, D
+            // Cells that need symbols: M, A, D, a, d
             if (cell === 'M') {
                 const symbol = mainSymbolsArr[mainIndex] || '';
                 symbolMap.set(`${x},${y}`, symbol);
@@ -42,7 +42,7 @@ export function parseLevel(level: Level): ParsedLevel {
                     regionMap.set('MAIN', { cells: [], type: 'MAIN' });
                 }
                 regionMap.get('MAIN')!.cells.push({ x, y });
-            } else if (cell === 'A') {
+            } else if (cell === 'A' || cell === 'a') {
                 const symbol = allowedSymbolsArr[allowedIndex] || '';
                 symbolMap.set(`${x},${y}`, symbol);
                 allowedIndex++;
@@ -51,7 +51,7 @@ export function parseLevel(level: Level): ParsedLevel {
                     regionMap.set('ALLOWED', { cells: [], type: 'ALLOWED' });
                 }
                 regionMap.get('ALLOWED')!.cells.push({ x, y });
-            } else if (cell === 'D') {
+            } else if (cell === 'D' || cell === 'd') {
                 const symbol = disallowedSymbolsArr[disallowedIndex] || '';
                 symbolMap.set(`${x},${y}`, symbol);
                 disallowedIndex++;
