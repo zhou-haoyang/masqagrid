@@ -1,7 +1,23 @@
+'use client';
+
+import { useState } from 'react';
 import { GameCanvas } from './components/GameCanvas';
-import { LEVEL_1 } from './lib/levels';
+import { LevelSelector } from './components/LevelSelector';
+import { getLevelById, DEFAULT_LEVEL } from './levels';
 
 export default function Home() {
+  // State for selected level
+  const [selectedLevelId, setSelectedLevelId] = useState(DEFAULT_LEVEL.id);
+
+  // Get current level (with fallback)
+  const currentLevelData = getLevelById(selectedLevelId);
+  const currentLevel = currentLevelData || DEFAULT_LEVEL.level;
+
+  // Handle level change
+  const handleLevelChange = (newLevelId: string) => {
+    setSelectedLevelId(newLevelId);
+  };
+
   return (
     <main className="min-h-screen flex flex-col items-center justify-center p-4 bg-slate-50">
       <div className="text-center mb-6">
@@ -11,7 +27,14 @@ export default function Home() {
         </p>
       </div>
 
-      <GameCanvas level={LEVEL_1} />
+      {/* Level Selector */}
+      <LevelSelector
+        selectedLevelId={selectedLevelId}
+        onLevelChange={handleLevelChange}
+      />
+
+      {/* Game Canvas - key prop forces remount on level change */}
+      <GameCanvas key={selectedLevelId} level={currentLevel} />
 
       <div className="mt-8 text-sm text-gray-400 max-w-lg text-center">
         <p>Instructions: Drag shapes from the bottom inventory onto the grid.</p>
