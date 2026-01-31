@@ -34,10 +34,42 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 }); // Offset cursor -> top-left of piece (pixels)
     const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 }); // Current pixel position of top-left
 
-    // Initial ID assignment
     function initialPiecesWithIds(ps: Piece[]) {
         return ps.map(p => ({ ...p, id: p.id || crypto.randomUUID() }));
     }
+
+    // Helper for transformations during drag
+    const getTransformedState = useCallback(() => {
+        if (!draggedPieceShape) return null;
+        let finalShape = draggedPieceShape;
+
+        // Apply flip first
+        if (dragFlipped) {
+            finalShape = flipMatrixHorizontal(finalShape);
+        }
+
+        // Apply rotation
+        const normalizedRotation = ((dragRotation % 360) + 360) % 360;
+        const rotations = normalizedRotation / 90;
+        for (let i = 0; i < rotations; i++) {
+            finalShape = rotateMatrix90(finalShape);
+        }
+
+        // Calculate visual shift if piece is rotated 90 or 270 degrees
+        let shiftX = 0;
+        let shiftY = 0;
+        if (normalizedRotation === 90 || normalizedRotation === 270) {
+            const W = draggedPieceShape[0].length;
+            const H = draggedPieceShape.length;
+            shiftX = (W - H) / 2 * CELL_SIZE;
+            shiftY = (H - W) / 2 * CELL_SIZE;
+        }
+
+        const gridX = Math.round((dragPosition.x + shiftX) / CELL_SIZE);
+        const gridY = Math.round((dragPosition.y + shiftY) / CELL_SIZE);
+
+        return { finalShape, gridX, gridY };
+    }, [draggedPieceShape, dragRotation, dragFlipped, dragPosition.x, dragPosition.y]);
 
     // --- Interaction Handlers ---
 
@@ -122,39 +154,16 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
             return;
         }
 
-        // Apply visual transforms to shape before dropping
-        let finalShape = draggedPieceShape || originalPiece.shape;
+        // Use helper for transformed state
+        const state = getTransformedState();
+        if (!state) return;
 
-        // Apply flip first if needed
-        if (dragFlipped) {
-            finalShape = flipMatrixHorizontal(finalShape);
-        }
-
-        // Apply rotation (normalized to 0-270)
-        const normalizedRotation = ((dragRotation % 360) + 360) % 360;
-        const rotations = normalizedRotation / 90;
-        for (let i = 0; i < rotations; i++) {
-            finalShape = rotateMatrix90(finalShape);
-        }
-
-        // Calculate visual shift if piece is rotated 90 or 270 degrees
-        let shiftX = 0;
-        let shiftY = 0;
-        if (normalizedRotation === 90 || normalizedRotation === 270) {
-            const W = (draggedPieceShape[0]?.length || 0);
-            const H = draggedPieceShape.length;
-            shiftX = (W - H) / 2 * CELL_SIZE;
-            shiftY = (H - W) / 2 * CELL_SIZE;
-        }
-
-        // Determine drop grid coordinates from visual position
-        const dropGridX = Math.round((dragPosition.x + shiftX) / CELL_SIZE);
-        const dropGridY = Math.round((dragPosition.y + shiftY) / CELL_SIZE);
+        const { finalShape, gridX, gridY } = state;
 
         // Create a temp piece at the new position
         const droppedPiece = {
             ...originalPiece,
-            position: { x: dropGridX, y: dropGridY },
+            position: { x: gridX, y: gridY },
             shape: finalShape
         };
 
@@ -163,9 +172,10 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
 
         // Check bounds (Rough check: is it generally inside the world?)
         // Actually engine handles collisions, but we should handle "out of bounds"
-        if (dropGridX < 0 || dropGridY < 0 ||
-            dropGridX + droppedPiece.shape[0].length > level.width ||
-            dropGridY + droppedPiece.shape.length > level.height) {
+        // Check bounds
+        if (gridX < 0 || gridY < 0 ||
+            gridX + droppedPiece.shape[0].length > level.width ||
+            gridY + droppedPiece.shape.length > level.height) {
             // Bounce back
             setDraggedPieceId(null);
             setDraggedPieceShape(null);
@@ -179,10 +189,11 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
         const otherPieces = pieces.filter(p => p.id !== draggedPieceId);
         const result = manageCollision(otherPieces, droppedPiece, level.grid);
 
-        // also check if piece actually changed position
-        const changedPosition = originalPiece.position.x !== dropGridX || originalPiece.position.y !== dropGridY;
+        // Helper to check if shape changed
+        const shapesEqual = JSON.stringify(originalPiece.shape) === JSON.stringify(droppedPiece.shape);
+        const changedState = originalPiece.position.x !== gridX || originalPiece.position.y !== gridY || !shapesEqual;
 
-        if (result.success && changedPosition) {
+        if (result.success && changedState) {
             setHistory(prev => [...prev, previousState]);
             setPieces(result.newPieces);
             setMoveId(m => m + 1); // Trigger animation
@@ -486,29 +497,47 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
                 {/* Layer 1: Grid (Regions, Symbols, Blocked Cells) */}
                 {renderGrid()}
 
+                {/* Layer 1.5: Piece Shadow (Ghost) */}
+                {(() => {
+                    const state = getTransformedState();
+                    if (!draggedPieceId || !state) return null;
+                    const originalPiece = pieces.find(p => p.id === draggedPieceId);
+                    if (!originalPiece) return null;
+
+                    return (
+                        <div style={{ pointerEvents: 'none' }}>
+                            <PieceRenderer
+                                piece={{
+                                    ...originalPiece,
+                                    shape: state.finalShape,
+                                    position: { x: state.gridX, y: state.gridY }
+                                }}
+                                cellSize={CELL_SIZE}
+                                style={{
+                                    opacity: 0.4,
+                                    zIndex: 5,
+                                    transition: 'none',
+                                    filter: 'grayscale(1) brightness(1.5)' // Make it look like a ghost
+                                }}
+                            />
+                        </div>
+                    );
+                })()}
+
                 {/* Layer 2: Pieces */}
                 {pieces.map(piece => {
                     const isDragging = piece.id === draggedPieceId;
-
-                    // Construct style overrides for the dragging piece
-                    // We keep the SAME Component instance for both dragging and non-dragging
-                    // for the same piece ID, ensuring CSS transitions work.
-                    const dragStyle: React.CSSProperties = isDragging ? {
-                        transform: `translate(${dragPosition.x}px, ${dragPosition.y}px) rotate(${dragRotation}deg) scaleX(${dragFlipped ? -1 : 1}) scale(1.05)`,
-                        zIndex: 100,
-                        transition: 'transform 0.1s ease-out', // Subtle smoothing while dragging
-                        transformOrigin: 'center'
-                    } : {};
-
                     return (
                         <PieceRenderer
                             key={piece.id}
                             piece={isDragging ? { ...piece, shape: draggedPieceShape || piece.shape } : piece}
                             cellSize={CELL_SIZE}
                             isDragging={isDragging}
+                            dragPosition={isDragging ? dragPosition : undefined}
+                            dragRotation={isDragging ? dragRotation : 0}
+                            dragFlipped={isDragging ? dragFlipped : false}
                             violatingCells={winState.violatingCells}
                             onPointerDown={isDragging ? undefined : (e: React.PointerEvent) => handlePointerDown(e, piece)}
-                            style={dragStyle}
                         />
                     );
                 })}

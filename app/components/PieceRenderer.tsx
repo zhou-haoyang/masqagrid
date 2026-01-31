@@ -1,3 +1,4 @@
+import React, { useRef, useEffect, useState } from 'react';
 import { Piece, Position } from '../types';
 import { getPieceColor } from '../lib/piece-utils';
 
@@ -5,6 +6,9 @@ interface PieceRendererProps {
     piece: Piece;
     cellSize: number;
     isDragging?: boolean;
+    dragPosition?: { x: number, y: number };
+    dragRotation?: number;
+    dragFlipped?: boolean;
     violatingCells?: Position[];
     onPointerDown?: (e: React.PointerEvent) => void;
     style?: React.CSSProperties;
@@ -13,12 +17,34 @@ interface PieceRendererProps {
 export const PieceRenderer: React.FC<PieceRendererProps> = ({
     piece,
     cellSize,
-    isDragging,
+    isDragging = false,
+    dragPosition,
+    dragRotation = 0,
+    dragFlipped = false,
     violatingCells = [],
     onPointerDown,
     style
 }) => {
     const displayColor = getPieceColor(piece.type);
+
+    // Track state transitions for animation control
+    const prevDragging = useRef(isDragging);
+    const [justDropped, setJustDropped] = useState(false);
+    
+    useEffect(() => {
+        if (prevDragging.current && !isDragging) {
+            setJustDropped(true);
+            const timer = setTimeout(() => setJustDropped(false), 50);
+            return () => clearTimeout(timer);
+        }
+        prevDragging.current = isDragging;
+    }, [isDragging]);
+
+    const skipTransition = isDragging || justDropped;
+
+    // Calculate position
+    const posX = isDragging && dragPosition ? dragPosition.x : piece.position.x * cellSize;
+    const posY = isDragging && dragPosition ? dragPosition.y : piece.position.y * cellSize;
 
     return (
         <div
@@ -28,11 +54,11 @@ export const PieceRenderer: React.FC<PieceRendererProps> = ({
                 top: 0,
                 width: piece.shape[0].length * cellSize,
                 height: piece.shape.length * cellSize,
-                pointerEvents: 'none', // Pass through to grid on empty pixels
+                pointerEvents: 'none',
                 opacity: isDragging ? 0.8 : 1,
                 zIndex: isDragging ? 50 : 10,
-                transform: `translate(${piece.position.x * cellSize}px, ${piece.position.y * cellSize}px) ${isDragging ? 'scale(1.05)' : 'scale(1)'}`,
-                transition: isDragging ? 'none' : 'transform 0.3s cubic-bezier(0.34, 1.2, 0.64, 1)',
+                transform: `translate(${posX}px, ${posY}px)`,
+                transition: skipTransition ? 'none' : 'transform 0.3s cubic-bezier(0.34, 1.2, 0.64, 1)',
                 willChange: 'transform',
                 ...style
             }}
@@ -40,15 +66,18 @@ export const PieceRenderer: React.FC<PieceRendererProps> = ({
         >
             <div
                 style={{
+                    width: '100%',
+                    height: '100%',
                     display: 'grid',
                     gridTemplateRows: `repeat(${piece.shape.length}, 1fr)`,
                     gridTemplateColumns: `repeat(${piece.shape[0].length}, 1fr)`,
-                    width: '100%',
-                    height: '100%'
+                    transform: isDragging ? `rotate(${dragRotation}deg) scaleX(${dragFlipped ? -1 : 1}) scale(1.05)` : 'rotate(0) scaleX(1) scale(1)',
+                    transition: justDropped ? 'none' : 'transform 0.2s ease-out',
+                    transformOrigin: 'center'
                 }}
             >
-                {piece.shape.map((row, r) =>
-                    row.map((cell, c) => {
+                {piece.shape.map((row: number[], r: number) =>
+                    row.map((cell: number, c: number) => {
                         if (cell !== 1) return <div key={`${r}-${c}`} style={{ width: '100%', height: '100%' }} />;
 
                         // Check neighbors to determine borders
