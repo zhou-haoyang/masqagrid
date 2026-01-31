@@ -207,9 +207,9 @@ export default function LevelEditor() {
 
     const errors = [];
     if (mCount === 0) errors.push('No Main (M) cells defined');
-    if (mainSymbols.length !== mCount) errors.push(`Main symbols count (${mainSymbols.length}) doesn't match M cells (${mCount})`);
-    if (allowedSymbols.length !== aCount) errors.push(`Allowed symbols count (${allowedSymbols.length}) doesn't match A cells (${aCount})`);
-    if (disallowedSymbols.length !== dCount) errors.push(`Disallowed symbols count (${disallowedSymbols.length}) doesn't match D cells (${dCount})`);
+    if ([...mainSymbols].length !== mCount) errors.push(`Main symbols count (${[...mainSymbols].length}) doesn't match M cells (${mCount})`);
+    if ([...allowedSymbols].length !== aCount) errors.push(`Allowed symbols count (${[...allowedSymbols].length}) doesn't match A cells (${aCount})`);
+    if ([...disallowedSymbols].length !== dCount) errors.push(`Disallowed symbols count (${[...disallowedSymbols].length}) doesn't match D cells (${dCount})`);
 
     if (errors.length > 0) {
       setValidationMessage(errors.join('\\n'));
@@ -436,7 +436,7 @@ export default function LevelEditor() {
                 placeholder="Enter symbols for M cells in reading order"
               />
               <div className="text-xs text-gray-500 mt-1">
-                Length: {mainSymbols.length}
+                Length: {[...mainSymbols].length}
               </div>
             </div>
 
@@ -452,7 +452,7 @@ export default function LevelEditor() {
                 placeholder="Enter symbols for A cells"
               />
               <div className="text-xs text-gray-500 mt-1">
-                Length: {allowedSymbols.length}
+                Length: {[...allowedSymbols].length}
               </div>
             </div>
 
@@ -468,7 +468,7 @@ export default function LevelEditor() {
                 placeholder="Enter symbols for D cells"
               />
               <div className="text-xs text-gray-500 mt-1">
-                Length: {disallowedSymbols.length}
+                Length: {[...disallowedSymbols].length}
               </div>
             </div>
           </div>

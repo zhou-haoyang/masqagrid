@@ -71,24 +71,24 @@ export function validateLevel(level: Level): ValidationResult {
   }
 
   // Check symbol counts match cell counts
-  if (level.mainSymbols.length !== mCount) {
+  if ([...level.mainSymbols].length !== mCount) {
     errors.push({
       type: 'symbol-mismatch',
-      message: `Main symbols count (${level.mainSymbols.length}) doesn't match M cells (${mCount})`,
+      message: `Main symbols count (${[...level.mainSymbols].length}) doesn't match M cells (${mCount})`,
     });
   }
 
-  if (level.allowedSymbols.length !== aCount) {
+  if ([...level.allowedSymbols].length !== aCount) {
     errors.push({
       type: 'symbol-mismatch',
-      message: `Allowed symbols count (${level.allowedSymbols.length}) doesn't match A cells (${aCount})`,
+      message: `Allowed symbols count (${[...level.allowedSymbols].length}) doesn't match A cells (${aCount})`,
     });
   }
 
-  if (level.disallowedSymbols.length !== dCount) {
+  if ([...level.disallowedSymbols].length !== dCount) {
     errors.push({
       type: 'symbol-mismatch',
-      message: `Disallowed symbols count (${level.disallowedSymbols.length}) doesn't match D cells (${dCount})`,
+      message: `Disallowed symbols count (${[...level.disallowedSymbols].length}) doesn't match D cells (${dCount})`,
     });
   }
 

@@ -19,6 +19,10 @@ export function parseLevel(level: Level): ParsedLevel {
     const symbolMap = new Map<string, string>();
     const regionMap = new Map<string, { cells: Array<{x: number, y: number}>, type: Region['type'] }>();
     
+    const mainSymbolsArr = [...mainSymbols];
+    const allowedSymbolsArr = [...allowedSymbols];
+    const disallowedSymbolsArr = [...disallowedSymbols];
+    
     let mainIndex = 0;
     let allowedIndex = 0;
     let disallowedIndex = 0;
@@ -30,7 +34,7 @@ export function parseLevel(level: Level): ParsedLevel {
             
             // Cells that need symbols: M, A, D
             if (cell === 'M') {
-                const symbol = mainSymbols[mainIndex] || '';
+                const symbol = mainSymbolsArr[mainIndex] || '';
                 symbolMap.set(`${x},${y}`, symbol);
                 mainIndex++;
                 
@@ -39,7 +43,7 @@ export function parseLevel(level: Level): ParsedLevel {
                 }
                 regionMap.get('MAIN')!.cells.push({ x, y });
             } else if (cell === 'A') {
-                const symbol = allowedSymbols[allowedIndex] || '';
+                const symbol = allowedSymbolsArr[allowedIndex] || '';
                 symbolMap.set(`${x},${y}`, symbol);
                 allowedIndex++;
                 
@@ -48,7 +52,7 @@ export function parseLevel(level: Level): ParsedLevel {
                 }
                 regionMap.get('ALLOWED')!.cells.push({ x, y });
             } else if (cell === 'D') {
-                const symbol = disallowedSymbols[disallowedIndex] || '';
+                const symbol = disallowedSymbolsArr[disallowedIndex] || '';
                 symbolMap.set(`${x},${y}`, symbol);
                 disallowedIndex++;
                 

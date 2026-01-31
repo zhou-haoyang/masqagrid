@@ -1,7 +1,7 @@
 import { Level, PieceType } from '../types';
 
 export const LEVEL_0: Level = {
-    id: 'level-1',
+    id: 'level-0',
     width: 20,
     height: 15,
     grid: [
@@ -15,14 +15,14 @@ export const LEVEL_0: Level = {
         "..MMMMMM............",
         "....................",
         "##..................",
-        "##IIIIIIIIIIIIII....",
-        "..IIIIIIIIIIIIII....",
-        "..IIIIIIIIIIIIII....",
-        "..IIIIIIIIIIIIII....",
+        "##IIIIIIIIIIIIIIII..",
+        "..IIIIIIIIIIIIIIII..",
+        "..IIIIIIIIIIIIIIII..",
+        "..IIIIIIIIIIIIIIII..",
         "...................."
     ],
-    mainSymbols: "ABACABBACABACABACABACABACABACABACABACX",
-    allowedSymbols: "AB  ",
+    mainSymbols: "🐱B🐱C🐱BB🐱C🐱B🐱C🐱B🐱C🐱B🐱C🐱B🐱C🐱B🐱C🐱B🐱C🐱B🐱CX",
+    allowedSymbols: "🐱B  ",
     disallowedSymbols: "CX  ",
     initialPieces: [
         // Spaced out inventory: x=2, 4, 6, 9, 13, 16 

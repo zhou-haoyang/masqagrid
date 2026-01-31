@@ -3,6 +3,7 @@ import { Level } from '../types';
 // Import all level files
 import { LEVEL_0 } from './0';
 import { LEVEL_1 } from './1';
+import { LEVEL_2 } from './2';
 import { LEVEL_3 } from './3';
 
 // Level metadata for UI
@@ -23,6 +24,11 @@ export const LEVELS: LevelMetadata[] = [
     id: '1',
     name: 'Level 1',
     level: LEVEL_1,
+  },
+  {
+    id: '2',
+    name: 'Level 2',
+    level: LEVEL_2,
   },
   {
     id: '3',
