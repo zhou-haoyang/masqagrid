@@ -38,6 +38,12 @@ export function doPiecesOverlap(p1: Piece, p2: Piece): boolean {
  * Used for "Merge" checks (same types merge if touching).
  */
 export function doPiecesConnect(p1: Piece, p2: Piece): boolean {
+    // DIVIDE pieces only "connect" (interact) if they strictly overlap.
+    // Touching without overlapping does NOT trigger a merge/split for DIVIDE.
+    if (p1.type === PieceType.DIVIDE && p2.type === PieceType.DIVIDE) {
+        return doPiecesOverlap(p1, p2);
+    }
+
     // 1. Expanded AABB Check (Inflate by 1)
     const p1Right = p1.position.x + p1.shape[0].length;
     const p1Bottom = p1.position.y + p1.shape.length;
@@ -124,9 +130,82 @@ export function manageCollision(allPieces: Piece[], droppedPiece: Piece): Collis
     const height = maxY - minY;
 
     // Apply Op
-    let grid: number[][];
+    let grid: number[][]; // For UNION/XOR/INTERSECT fallback
+    const newPieces: Piece[] = [];
 
-    if (type === PieceType.INTERSECT) {
+    if (type === PieceType.DIVIDE) {
+        // DIVIDE Logic:
+        // 1. Build a map of Pixel -> Set<PieceID>
+        const pixelMap = new Array(height).fill(0).map(() => new Array(width).fill(null).map(() => new Set<string>()));
+        const idToPiece = new Map<string, Piece>();
+
+        for (const p of fullCluster) {
+            idToPiece.set(p.id, p);
+            for (let r = 0; r < p.shape.length; r++) {
+                for (let c = 0; c < p.shape[r].length; c++) {
+                    if (p.shape[r][c]) {
+                        const gx = (p.position.x + c) - minX;
+                        const gy = (p.position.y + r) - minY;
+                        if (gx >= 0 && gx < width && gy >= 0 && gy < height) {
+                            pixelMap[gy][gx].add(p.id);
+                        }
+                    }
+                }
+            }
+        }
+
+        // 2. Group pixels by their Set<PieceID> signature
+        // Signature string: "id1,id2,id3" (sorted)
+        const signatureToPixels = new Map<string, { r: number, c: number }[]>();
+
+        for (let r = 0; r < height; r++) {
+            for (let c = 0; c < width; c++) {
+                const ids = pixelMap[r][c];
+                if (ids.size > 0) {
+                    const sortedIds = Array.from(ids).sort();
+                    const sig = sortedIds.join(',');
+                    if (!signatureToPixels.has(sig)) {
+                        signatureToPixels.set(sig, []);
+                    }
+                    signatureToPixels.get(sig)!.push({ r, c });
+                }
+            }
+        }
+
+        // 3. For each unique signature, create new pieces
+        for (const [sig, pixels] of signatureToPixels.entries()) {
+            // Create a grid just for this signature
+            const groupGrid = createEmptyGrid(width, height);
+            for (const { r, c } of pixels) {
+                groupGrid[r][c] = 1;
+            }
+
+            const components = findConnectedComponents(groupGrid, { x: minX, y: minY, width, height });
+            const sourceIds = sig.split(',');
+
+            // Determine color:
+            // If sourceIds has only 1 ID, use that piece's color.
+            // If it has multiple (intersection), use droppedPiece.color (or mixed, but requirements say droppedPiece/intersection logic usually inherits active/dominant).
+            // Let's use droppedPiece.color for intersections as per plan (simplest valid choice).
+            // For single-source parts, preserve original color.
+            let color = droppedPiece.color;
+            if (sourceIds.length === 1) {
+                const originalPiece = idToPiece.get(sourceIds[0]);
+                if (originalPiece) color = originalPiece.color;
+            }
+
+            for (const comp of components) {
+                newPieces.push({
+                    id: crypto.randomUUID(),
+                    type: type,
+                    position: comp.position,
+                    shape: comp.shape,
+                    color: color
+                });
+            }
+        }
+
+    } else if (type === PieceType.INTERSECT) {
         // AND Logic with Fallback: P1 & P2 & P3...
         // If result is EMPTY (meaning pieces just touch but don't overlap, or complex disjoint),
         // Fallback to UNION (Merge).
@@ -163,24 +242,34 @@ export function manageCollision(allPieces: Piece[], droppedPiece: Piece): Collis
         } else {
             grid = intersectGrid;
         }
+
+        // Vectorize for non-DIVIDE
+        const components = findConnectedComponents(grid, { x: minX, y: minY, width, height });
+        newPieces.push(...components.map(comp => ({
+            id: crypto.randomUUID(),
+            type: type,
+            position: comp.position,
+            shape: comp.shape,
+            color: droppedPiece.color
+        })));
+
     } else {
         // UNION / XOR Logic (Accumulative)
         grid = createEmptyGrid(width, height);
         for (const p of fullCluster) {
             mergeGrid(grid, p, minX, minY, type === PieceType.XOR ? 'XOR' : 'OR');
         }
+
+        // Vectorize for non-DIVIDE
+        const components = findConnectedComponents(grid, { x: minX, y: minY, width, height });
+        newPieces.push(...components.map(comp => ({
+            id: crypto.randomUUID(),
+            type: type,
+            position: comp.position,
+            shape: comp.shape,
+            color: droppedPiece.color
+        })));
     }
-
-    // 4. Vectorize
-    const components = findConnectedComponents(grid, { x: minX, y: minY, width, height });
-
-    const newPieces: Piece[] = components.map(comp => ({
-        id: crypto.randomUUID(),
-        type: type,
-        position: comp.position,
-        shape: comp.shape,
-        color: droppedPiece.color
-    }));
 
     return { success: true, newPieces: [...piecesToKeep, ...newPieces] };
 }

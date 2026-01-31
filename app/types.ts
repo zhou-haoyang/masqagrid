@@ -3,6 +3,7 @@ export enum PieceType {
     UNION = 'UNION',
     XOR = 'XOR',
     INTERSECT = 'INTERSECT',
+    DIVIDE = 'DIVIDE',
 }
 
 export interface Position {
