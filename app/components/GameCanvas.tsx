@@ -3,9 +3,11 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Level, Piece, PieceType } from '../types';
 import { manageCollision } from '../lib/game-engine';
+import { rotateMatrix90, flipMatrixHorizontal } from '../lib/grid-utils';
+import { parseLevel } from '../lib/level-parser';
 import { checkWinCondition, WinState } from '../lib/rules-engine'; // [NEW]
 import { PieceRenderer } from './PieceRenderer';
-import { RefreshCcw, Undo2, Trophy, AlertTriangle } from 'lucide-react'; // Added icons
+import { RefreshCcw, Undo2, Trophy, AlertTriangle, RotateCw, FlipHorizontal } from 'lucide-react'; // Added icons
 
 interface GameCanvasProps {
     level: Level;
@@ -18,9 +20,14 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
     const [pieces, setPieces] = useState<Piece[]>(initialPiecesWithIds(level.initialPieces));
     const [history, setHistory] = useState<Piece[][]>([]);
     const [winState, setWinState] = useState<WinState>({ isWin: false, violations: [] }); // [NEW]
+    
+    // Parse level grid into runtime structures
+    const parsed = parseLevel(level);
+    const { regions, symbolMap, gridCells } = parsed;
 
     // Drag State
     const [draggedPieceId, setDraggedPieceId] = useState<string | null>(null);
+    const [draggedPieceShape, setDraggedPieceShape] = useState<number[][] | null>(null); // Track shape transformations
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 }); // Offset cursor -> top-left of piece (pixels)
     const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 }); // Current pixel position of top-left
 
@@ -44,12 +51,31 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
         const pieceY = piece.position.y * CELL_SIZE;
 
         setDraggedPieceId(piece.id);
+        setDraggedPieceShape(piece.shape); // Initialize shape
         setDragOffset({ x: mouseX - pieceX, y: mouseY - pieceY });
         setDragPosition({ x: pieceX, y: pieceY });
 
         // Set capture to track outside div
         (e.target as Element).setPointerCapture(e.pointerId);
     };
+
+    // Keyboard Listeners for Rotation/Flipping
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (!draggedPieceId || !draggedPieceShape) return;
+
+            if (e.code === 'Space' || e.code === 'KeyR') {
+                e.preventDefault();
+                setDraggedPieceShape(prev => prev ? rotateMatrix90(prev) : null);
+            } else if (e.code === 'KeyF') {
+                e.preventDefault();
+                setDraggedPieceShape(prev => prev ? flipMatrixHorizontal(prev) : null);
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [draggedPieceId, draggedPieceShape]); // Depend on dragged IDs
 
     const handlePointerMove = (e: React.PointerEvent) => {
         if (!draggedPieceId || !containerRef.current) return;
@@ -84,7 +110,8 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
         // Create a temp piece at the new position
         const droppedPiece = {
             ...originalPiece,
-            position: { x: dropGridX, y: dropGridY }
+            position: { x: dropGridX, y: dropGridY },
+            shape: draggedPieceShape || originalPiece.shape // Use the transformed shape
         };
 
         // Store snapshot for Undo
@@ -103,7 +130,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
         // Run Engine
         // Remove the moved piece from the "other pieces" list before calculating collision
         const otherPieces = pieces.filter(p => p.id !== draggedPieceId);
-        const result = manageCollision(otherPieces, droppedPiece);
+        const result = manageCollision(otherPieces, droppedPiece, level.grid);
 
         if (result.success) {
             setHistory(prev => [...prev, previousState]);
@@ -111,8 +138,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
 
             // Check Win [NEW]
             // We need to wait for state update? No, we have the new pieces.
-            const newState = checkWinCondition(level, result.newPieces);
-            setWinState(newState);
+            setWinState(checkWinCondition(regions, result.newPieces));
         } else {
             // Invalid move (Blocker collision etc) - Snap back is handled by state reset
         }
@@ -127,7 +153,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
         setHistory(newHistory);
         if (previous) {
             setPieces(previous);
-            setWinState(checkWinCondition(level, previous)); // Re-check
+            setWinState(checkWinCondition(regions, previous)); // Re-check
         }
     };
 
@@ -136,13 +162,13 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
             const initial = initialPiecesWithIds(level.initialPieces);
             setPieces(initial);
             setHistory([]);
-            setWinState(checkWinCondition(level, initial)); // Re-check
+            setWinState(checkWinCondition(regions, initial)); // Re-check
         }
     };
 
     // Check initial state on mount
     useEffect(() => {
-        setWinState(checkWinCondition(level, pieces));
+        setWinState(checkWinCondition(regions, pieces));
     }, []); // Run once
 
     // --- Rendering Helpers ---
@@ -168,44 +194,67 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
         return lines;
     };
 
-    const renderRegions = () => {
-        return level.regions.map(region => (
-            <div key={region.id}
-                style={{
-                    position: 'absolute',
-                    left: region.x * CELL_SIZE,
-                    top: region.y * CELL_SIZE,
-                    width: region.width * CELL_SIZE,
-                    height: region.height * CELL_SIZE,
-                    backgroundColor: region.type === 'MAIN' ? '#f0f9ff' : // Light Blue
-                        region.type === 'ALLOWED' ? '#dcfce7' : // Green-100
-                            region.type === 'DISALLOWED' ? '#fee2e2' : // Red-100
-                                '#f3f4f6', // Gray-100 (Inventory)
-                    border: '2px solid rgba(0,0,0,0.1)',
-                    display: 'grid',
-                    gridTemplateColumns: `repeat(${region.width}, 1fr)`,
-                    gridTemplateRows: `repeat(${region.height}, 1fr)`,
-                    fontSize: '20px',
-                    fontWeight: 'bold',
-                    color: '#374151',
-                    zIndex: 0
-                }}
-            >
-                {/* Render Symbols if present */}
-                {region.symbols && region.symbols.map((row, r) =>
-                    row.map((symbol, c) => (
-                        <div key={`${r}-${c}`} className="flex items-center justify-center">
+    const renderGrid = () => {
+        const cells = [];
+        for (let y = 0; y < level.height; y++) {
+            for (let x = 0; x < level.width; x++) {
+                const cellType = gridCells[y]?.[x] || '.';
+                const symbol = symbolMap.get(`${x},${y}`) || '';
+                
+                // Determine background color
+                let bgColor = 'transparent';
+                let bgImage = '';
+                let border = 'none';
+                
+                if (cellType === 'M') {
+                    bgColor = '#f0f9ff'; // Light Blue (Main)
+                    border = '1px solid rgba(0,0,0,0.05)';
+                } else if (cellType === 'A') {
+                    bgColor = '#dcfce7'; // Green-100 (Allowed)
+                    border = '1px solid rgba(0,0,0,0.05)';
+                } else if (cellType === 'D') {
+                    bgColor = '#fee2e2'; // Red-100 (Disallowed)
+                    border = '1px solid rgba(0,0,0,0.05)';
+                } else if (cellType === 'I') {
+                    bgColor = '#f3f4f6'; // Gray-100 (Inventory)
+                    border = '1px solid rgba(0,0,0,0.05)';
+                } else if (cellType === '#') {
+                    bgColor = '#ffffff';
+                    bgImage = 'repeating-linear-gradient(45deg, #e5e7eb 0, #e5e7eb 2px, #ffffff 2px, #ffffff 10px)';
+                    border = '1px solid #e5e5e5';
+                }
+                
+                if (cellType !== '.') {
+                    cells.push(
+                        <div key={`cell-${y}-${x}`}
+                            style={{
+                                position: 'absolute',
+                                left: x * CELL_SIZE,
+                                top: y * CELL_SIZE,
+                                width: CELL_SIZE,
+                                height: CELL_SIZE,
+                                backgroundColor: bgColor,
+                                backgroundImage: bgImage,
+                                border: border,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '20px',
+                                fontWeight: 'bold',
+                                color: '#374151',
+                                zIndex: cellType === '#' ? 5 : 0
+                            }}
+                        >
                             {symbol}
                         </div>
-                    ))
-                )}
-                {/* Label Overlay */}
-                <div className="absolute -top-6 left-0 text-xs font-bold text-gray-500 uppercase tracking-wider bg-white px-2 rounded box-border whitespace-nowrap z-10">
-                    {region.type}
-                </div>
-            </div>
-        ));
+                    );
+                }
+            }
+        }
+        return cells;
     };
+
+    // Removed renderRegions - now using renderGrid
 
     return (
         <div className="flex flex-col items-center gap-4 p-8 select-none relative">
@@ -249,13 +298,16 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
                     className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-700 disabled:opacity-50">
                     <Undo2 size={16} /> Undo
                 </button>
+                <div className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-600 rounded border border-gray-200 text-sm">
+                   <RotateCw size={14} /> <span>Rotate: <b>R</b> / Space</span>
+                   <span className="w-px h-4 bg-gray-300 mx-1"/>
+                   <FlipHorizontal size={14} /> <span>Flip: <b>F</b></span>
+                </div>
                 <button onClick={handleReset}
                     className="flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300">
                     <RefreshCcw size={16} /> Reset
                 </button>
             </div>
-
-            <p>Cover "Disallowed" symbols to break the rules involved.</p>
 
             {/* Game Canvas Container */}
             <div
@@ -268,18 +320,17 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
                 {/* Layer 0: Grid Lines */}
                 {renderGridLines()}
 
-                {/* Layer 1: Regions (Symbols) */}
-                {renderRegions()}
+                {/* Layer 1: Grid (Regions, Symbols, Blocked Cells) */}
+                {renderGrid()}
 
                 {/* Layer 2: Pieces */}
                 {pieces.map(piece => {
                     const isDragging = piece.id === draggedPieceId;
-                    // If dragging, we render it at dragPosition, computed manually here
-                    // Wait, PieceRenderer takes grid coordinates.
-                    // We can cheat: PieceRenderer takes style overrides?
-                    // Or we render a "Ghost" at the drag position and hide the real one.
-
-                    if (isDragging) {
+                    
+                    if (isDragging && draggedPieceShape) {
+                        // Create a ghost piece object with the transformed shape
+                        // We use the draggedPieceShape state
+                        const ghostPiece = { ...piece, shape: draggedPieceShape };
                         return (
                             <div key={piece.id}
                                 style={{
@@ -290,28 +341,22 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
                                     pointerEvents: 'none' // Ghost doesn't catch events
                                 }}
                             >
-                                {/* Render raw shape without positioning logic since we wrapper it */}
-                                {/* Actually PieceRenderer expects absolute grid positioning. Let's make a wrapper or use style props if support */}
-                                {/* Re-using PieceRenderer logic slightly manually here for the dragged ghost */}
                                 <div style={{
-                                    width: piece.shape[0].length * CELL_SIZE,
-                                    height: piece.shape.length * CELL_SIZE,
-                                    display: 'grid',
-                                    gridTemplateColumns: `repeat(${piece.shape[0].length}, 1fr)`,
-                                    gridTemplateRows: `repeat(${piece.shape.length}, 1fr)`
+                                    width: draggedPieceShape[0].length * CELL_SIZE,
+                                    height: draggedPieceShape.length * CELL_SIZE,
+                                    // Use PieceRenderer logic indirectly or manually
+                                    // Let's use PieceRenderer but hack the style to position it absolutely based on pixel
                                 }}>
-                                    {piece.shape.map((row, r) => row.map((cell, c) => (
-                                        <div key={`${r}-${c}`} className="w-full h-full">
-                                            {cell === 1 && (
-                                                <div style={{
-                                                    backgroundColor: piece.color,
-                                                    width: '100%', height: '100%',
-                                                    opacity: 0.8,
-                                                    borderRadius: 2
-                                                }} />
-                                            )}
-                                        </div>
-                                    )))}
+                                    {/* We can actually use PieceRenderer if we fake the ghost piece position to 0,0 and translate parent 
+                                        BUT PieceRenderer expects Grid Coords. 
+                                        So we stick to manual render for ghost OR wrap PieceRenderer
+                                    */}
+                                     {/* Re-using PieceRenderer but passing it a "Zeroed" piece and positioning the container */}
+                                    <PieceRenderer 
+                                        piece={{...ghostPiece, position: {x:0, y:0}}} 
+                                        cellSize={CELL_SIZE} 
+                                        isDragging={true}
+                                    />
                                 </div>
                             </div>
                         );

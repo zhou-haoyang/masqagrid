@@ -38,39 +38,9 @@ export function doPiecesOverlap(p1: Piece, p2: Piece): boolean {
  * Used for "Merge" checks (same types merge if touching).
  */
 export function doPiecesConnect(p1: Piece, p2: Piece): boolean {
-    // 1. Expanded AABB Check (Inflate by 1)
-    const p1Right = p1.position.x + p1.shape[0].length;
-    const p1Bottom = p1.position.y + p1.shape.length;
-    const p2Right = p2.position.x + p2.shape[0].length;
-    const p2Bottom = p2.position.y + p2.shape.length;
-
-    // If dist > 1 (gap > 0), they are disjoint. 
-    // Logic: if p1.left > p2.right (strictly), gap exists.
-    // touching means p1.left == p2.right.
-    if (p1.position.x > p2Right || p2.position.x > p1Right ||
-        p1.position.y > p2Bottom || p2.position.y > p1Bottom) {
-        return false;
-    }
-
-    // 2. Pixel Check
-    // Iterate P1's occupied cells. Check if any are adjacent/overlapping to P2.
-    for (let r = 0; r < p1.shape.length; r++) {
-        for (let c = 0; c < p1.shape[r].length; c++) {
-            if (p1.shape[r][c] === 1) {
-                const gx = p1.position.x + c;
-                const gy = p1.position.y + r;
-
-                // Check Self (Overlap)
-                if (isCellOccupied(p2, gx, gy)) return true;
-                // Check Neighbors (Touch)
-                if (isCellOccupied(p2, gx + 1, gy)) return true;
-                if (isCellOccupied(p2, gx - 1, gy)) return true;
-                if (isCellOccupied(p2, gx, gy + 1)) return true;
-                if (isCellOccupied(p2, gx, gy - 1)) return true;
-            }
-        }
-    }
-    return false;
+    // Modified: Only return true if pieces strictly overlap.
+    // Touching edges without overlap no longer triggers a connection/merge.
+    return doPiecesOverlap(p1, p2);
 }
 
 function isCellOccupied(p: Piece, globalX: number, globalY: number): boolean {
@@ -82,13 +52,36 @@ function isCellOccupied(p: Piece, globalX: number, globalY: number): boolean {
 
 export type CollisionResult =
     | { success: true; newPieces: Piece[] }
-    | { success: false; reason: 'INVALID_TYPE' | 'BLOCKER' };
+    | { success: false; reason: 'INVALID_TYPE' | 'BLOCKER' | 'BLOCKED_CELL' };
 
 /**
  * Manages the collision of a dropped piece with the existing board state.
+ * now accepts optional grid for blocked cells and placement validation.
  */
-export function manageCollision(allPieces: Piece[], droppedPiece: Piece): CollisionResult {
+export function manageCollision(allPieces: Piece[], droppedPiece: Piece, grid?: string[]): CollisionResult {
     const type = droppedPiece.type;
+
+    // 0. Grid Placement Check
+    if (grid) {
+        for (let r = 0; r < droppedPiece.shape.length; r++) {
+            for (let c = 0; c < droppedPiece.shape[r].length; c++) {
+                if (droppedPiece.shape[r][c] === 1) {
+                    const gx = droppedPiece.position.x + c;
+                    const gy = droppedPiece.position.y + r;
+                    // Check bounds
+                    if (gy >= 0 && gy < grid.length && gx >= 0 && gx < grid[gy].length) {
+                        const cellType = grid[gy][gx];
+                        // Blocked cells: '#' (explicit block) and '.' (empty/void)
+                        if (cellType === '#') {
+                            return { success: false, reason: 'BLOCKED_CELL' };
+                        }
+                        // Valid placement cells: 'M', 'A', 'D', 'I'
+                        // (Pieces can be placed on Main, Allowed, Disallowed, Inventory)
+                    }
+                }
+            }
+        }
+    }
 
     // 1. Blocker Check (Diff Type Overlap)
     const blockers = allPieces.filter(p =>
@@ -124,7 +117,7 @@ export function manageCollision(allPieces: Piece[], droppedPiece: Piece): Collis
     const height = maxY - minY;
 
     // Apply Op
-    let grid: number[][];
+    let mergedGrid: number[][];
 
     if (type === PieceType.INTERSECT) {
         // AND Logic with Fallback: P1 & P2 & P3...
@@ -156,23 +149,23 @@ export function manageCollision(allPieces: Piece[], droppedPiece: Piece): Collis
 
         if (isEmpty) {
             // Fallback to UNION
-            grid = createEmptyGrid(width, height);
+            mergedGrid = createEmptyGrid(width, height);
             for (const p of fullCluster) {
-                mergeGrid(grid, p, minX, minY, 'OR');
+                mergeGrid(mergedGrid, p, minX, minY, 'OR');
             }
         } else {
-            grid = intersectGrid;
+            mergedGrid = intersectGrid;
         }
     } else {
         // UNION / XOR Logic (Accumulative)
-        grid = createEmptyGrid(width, height);
+        mergedGrid = createEmptyGrid(width, height);
         for (const p of fullCluster) {
-            mergeGrid(grid, p, minX, minY, type === PieceType.XOR ? 'XOR' : 'OR');
+            mergeGrid(mergedGrid, p, minX, minY, type === PieceType.XOR ? 'XOR' : 'OR');
         }
     }
 
     // 4. Vectorize
-    const components = findConnectedComponents(grid, { x: minX, y: minY, width, height });
+    const components = findConnectedComponents(mergedGrid, { x: minX, y: minY, width, height });
 
     const newPieces: Piece[] = components.map(comp => ({
         id: crypto.randomUUID(),

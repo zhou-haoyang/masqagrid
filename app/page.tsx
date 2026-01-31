@@ -36,11 +36,6 @@ export default function Home() {
       {/* Game Canvas - key prop forces remount on level change */}
       <GameCanvas key={selectedLevelId} level={currentLevel} />
 
-      <div className="mt-8 text-sm text-gray-400 max-w-lg text-center">
-        <p>Instructions: Drag shapes from the bottom inventory onto the grid.</p>
-        <p>Blue (Union) merges. Red (XOR) toggles. Overlap same-colored pieces to combine them.</p>
-        <p>Cover "Disallowed" symbols to break the rules involved.</p>
-      </div>
     </main>
   );
 }

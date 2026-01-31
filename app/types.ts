@@ -34,6 +34,9 @@ export interface Level {
     id: string;
     width: number;
     height: number;
-    regions: Region[];
+    grid: string[]; // ASCII Grid: '.'=Empty, '#'=Blocked, 'M'=Main, 'A'=Allowed, 'D'=Disallowed, 'I'=Inventory
+    mainSymbols: string; // Symbols for M cells in reading order
+    allowedSymbols: string; // Symbols for A cells in reading order
+    disallowedSymbols: string; // Symbols for D cells in reading order
     initialPieces: Piece[];
 }

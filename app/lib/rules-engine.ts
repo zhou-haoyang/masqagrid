@@ -1,14 +1,14 @@
-import { Level, Piece, SymbolGrid } from '../types';
+import { Level, Piece, SymbolGrid, Region } from '../types';
 
 /**
  * Returns a set of visible symbols for a given region based on the current pieces.
  */
 export function getVisibleSymbols(
-    level: Level,
+    regions: Region[],
     pieces: Piece[],
     regionId: string
 ): string[] {
-    const region = level.regions.find(r => r.id === regionId);
+    const region = regions.find(r => r.id === regionId);
     if (!region || !region.symbols) return [];
 
     const visible: string[] = [];
@@ -54,14 +54,14 @@ export interface WinState {
     violations: string[]; // Symbols that are disallowed but visible
 }
 
-export function checkWinCondition(level: Level, pieces: Piece[]): WinState {
+export function checkWinCondition(regions: Region[], pieces: Piece[]): WinState {
     // 1. Determine Rules
     // Rules are dynamic: They depend on what is visible in the Rule Regions
-    const allowedSymbols = new Set(getVisibleSymbols(level, pieces, 'allowed-symbols'));
-    const disallowedSymbols = new Set(getVisibleSymbols(level, pieces, 'disallowed-symbols'));
+    const allowedSymbols = new Set(getVisibleSymbols(regions, pieces, 'allowed-region'));
+    const disallowedSymbols = new Set(getVisibleSymbols(regions, pieces, 'disallowed-region'));
 
     // 2. Determine State
-    const mainSymbols = getVisibleSymbols(level, pieces, 'main-grid');
+    const mainSymbols = getVisibleSymbols(regions, pieces, 'main-region');
 
     // 3. Evaluate
     const violations: string[] = [];

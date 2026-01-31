@@ -130,3 +130,30 @@ export function findConnectedComponents(
 
     return components;
 }
+
+/**
+ * Rotates a 2D matrix 90 degrees clockwise.
+ */
+export function rotateMatrix90(matrix: number[][]): number[][] {
+    if (matrix.length === 0) return [];
+    const rows = matrix.length;
+    const cols = matrix[0].length;
+    // Transpose and then reverse each row for 90 deg clockwise
+    // New dimensions: cols x rows
+    const newMatrix = Array.from({ length: cols }, () => Array(rows).fill(0));
+
+    for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+            newMatrix[c][rows - 1 - r] = matrix[r][c];
+        }
+    }
+    return newMatrix;
+}
+
+/**
+ * Flips a 2D matrix horizontally.
+ */
+export function flipMatrixHorizontal(matrix: number[][]): number[][] {
+    // Reverse each row
+    return matrix.map(row => [...row].reverse());
+}
