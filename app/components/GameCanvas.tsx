@@ -19,8 +19,14 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const [pieces, setPieces] = useState<Piece[]>(initialPiecesWithIds(level.initialPieces));
     const [history, setHistory] = useState<Piece[][]>([]);
-    const [winState, setWinState] = useState<WinState>({ isWin: false, violations: [], violatingCells: [] }); // [NEW]
     const [moveId, setMoveId] = useState(0); // Trigger animation sync
+    const [winState, setWinState] = useState<WinState>({
+        isWin: false,
+        violations: [],
+        violatingCells: [],
+        allowedStats: [],
+        disallowedStats: []
+    });
 
     // Parse level grid into runtime structures
     const parsed = parseLevel(level);
@@ -440,6 +446,38 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
                         {winState.isWin ? 'Level Cleared!' : 'Status'}
                     </h3>
                 </div>
+
+                {/* Allowed Emoji Stats */}
+                {winState.allowedStats.length > 0 && (
+                    <div className="text-xs mb-3">
+                        <p className="font-bold mb-1 text-green-700">COVERED ALLOWED:</p>
+                        <div className="flex flex-col gap-1">
+                            {winState.allowedStats.map(stat => (
+                                <div key={stat.emoji} className="px-2 py-1 bg-green-50 border-2 border-green-300 font-bold flex items-center gap-2">
+                                    <span className="text-base">{stat.emoji}</span>
+                                    <span className="text-gray-600">
+                                        {stat.countInMain} × {stat.totalInRegion}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Disallowed Emoji Stats */}
+                {winState.disallowedStats.length > 0 && (
+                    <div className="text-xs mb-3">
+                        <p className="font-bold mb-1 text-red-700">DISALLOWED:</p>
+                        <div className="flex flex-col gap-1">
+                            {winState.disallowedStats.map(stat => (
+                                <div key={stat.emoji} className="px-2 py-1 bg-red-50 border-2 border-red-300 font-bold flex items-center gap-2">
+                                    <span className="text-base">{stat.emoji}</span>
+                                    <span className="text-gray-600">{stat.countInMain}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
 
                 {!winState.isWin && winState.violations.length > 0 && (
                     <div className="text-xs text-red-600">
