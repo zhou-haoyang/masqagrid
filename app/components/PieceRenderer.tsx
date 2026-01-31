@@ -22,14 +22,13 @@ export const PieceRenderer: React.FC<PieceRendererProps> = ({
 
     return (
         <div
-            onPointerDown={onPointerDown}
             style={{
                 position: 'absolute',
                 left: 0,
                 top: 0,
                 width: piece.shape[0].length * cellSize,
                 height: piece.shape.length * cellSize,
-                pointerEvents: isDragging ? 'none' : 'auto',
+                pointerEvents: 'none', // Pass through to grid on empty pixels
                 opacity: isDragging ? 0.8 : 1,
                 zIndex: isDragging ? 50 : 10,
                 transform: `translate(${piece.position.x * cellSize}px, ${piece.position.y * cellSize}px) ${isDragging ? 'scale(1.05)' : 'scale(1)'}`,
@@ -65,7 +64,15 @@ export const PieceRenderer: React.FC<PieceRendererProps> = ({
                         const isThisCellViolating = violatingCells.some(vc => vc.x === globalX && vc.y === globalY);
 
                         return (
-                            <div key={`${r}-${c}`} style={{ width: '100%', height: '100%' }}>
+                            <div 
+                                key={`${r}-${c}`} 
+                                onPointerDown={onPointerDown}
+                                style={{ 
+                                    width: '100%', 
+                                    height: '100%',
+                                    pointerEvents: isDragging ? 'none' : 'auto' // Interactive pixels
+                                }}
+                            >
                                 <div
                                     style={{
                                         backgroundColor: displayColor,

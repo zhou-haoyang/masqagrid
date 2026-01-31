@@ -49,7 +49,7 @@ export default <Level>{
             id: 'item-1769892436173-18iql0x',
             type: PieceType.BLOCKER,
             position: { x: 0, y: 7 },
-            shape: [[1, 1, 0], [1, 0, 0], [1, 0, 0]]
+            shape: [[1, 1], [1, 0], [1, 0]]
         }
     ]
 };

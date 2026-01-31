@@ -22,8 +22,8 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0f172a; /* Slate 900 (Night Sky) */
-    --foreground: #f3f4f6;
+    --background: #bae6fd; /* Sky Blue 200 */
+    --foreground: #111827; /* Gray 900 */
   }
 }
 
