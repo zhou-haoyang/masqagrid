@@ -140,16 +140,3 @@ Each piece is defined by:
 5. **Boolean Operation**: Apply type-specific operation (OR/XOR/AND)
 6. **Vectorization**: Use flood-fill to find separate connected components
 7. **Update State**: Replace old pieces with new vectorized pieces
-
-### Visual Feedback
-
-- **Win State**: Trophy icon (🏆) appears when level is cleared
-- **Violation State**: Alert icon (⚠️) appears with list of violating symbols
-- **Cell Highlighting**: Violating cells show red pulsating border
-- **Piece Opacity**: Dragging piece has 0.8 opacity
-- **Region Colors**:
-  - Main: Light blue (#f0f9ff)
-  - Allowed: Light green (#dcfce7)
-  - Disallowed: Light red (#fee2e2)
-  - Inventory: Light gray (#f3f4f6)
-  - Blocked cells: Diagonal stripe pattern
