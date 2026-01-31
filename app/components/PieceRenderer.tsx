@@ -5,21 +5,27 @@ interface PieceRendererProps {
     piece: Piece;
     cellSize: number;
     isDragging?: boolean;
+    onPointerDown?: (e: React.PointerEvent) => void;
+    style?: React.CSSProperties;
 }
 
-export const PieceRenderer: React.FC<PieceRendererProps> = ({ piece, cellSize, isDragging }) => {
+export const PieceRenderer: React.FC<PieceRendererProps> = ({ piece, cellSize, isDragging, onPointerDown, style }) => {
     return (
         <div
+            onPointerDown={onPointerDown}
             style={{
                 position: 'absolute',
-                left: piece.position.x * cellSize,
-                top: piece.position.y * cellSize,
+                left: 0,
+                top: 0,
                 width: piece.shape[0].length * cellSize,
                 height: piece.shape.length * cellSize,
-                pointerEvents: isDragging ? 'none' : 'auto', // Pass through events when dragging ghost
+                pointerEvents: isDragging ? 'none' : 'auto',
                 opacity: isDragging ? 0.8 : 1,
                 zIndex: isDragging ? 50 : 10,
-                transition: isDragging ? 'none' : 'transform 0.1s ease-out, left 0.1s, top 0.1s'
+                transform: `translate(${piece.position.x * cellSize}px, ${piece.position.y * cellSize}px) ${isDragging ? 'scale(1.05)' : 'scale(1)'}`,
+                transition: isDragging ? 'none' : 'transform 0.3s cubic-bezier(0.34, 1.2, 0.64, 1)',
+                willChange: 'transform',
+                ...style
             }}
             className="select-none"
         >

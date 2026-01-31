@@ -167,8 +167,9 @@ export function manageCollision(allPieces: Piece[], droppedPiece: Piece, grid?: 
     // 4. Vectorize
     const components = findConnectedComponents(mergedGrid, { x: minX, y: minY, width, height });
 
-    const newPieces: Piece[] = components.map(comp => ({
-        id: crypto.randomUUID(),
+    const newPieces: Piece[] = components.map((comp, index) => ({
+        // Preserve original ID if it's the primary component
+        id: (index === 0 && components.length === 1) ? droppedPiece.id : crypto.randomUUID(),
         type: type,
         position: comp.position,
         shape: comp.shape,
