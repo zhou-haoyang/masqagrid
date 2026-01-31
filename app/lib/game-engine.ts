@@ -55,6 +55,73 @@ export type CollisionResult =
     | { success: false; reason: 'INVALID_TYPE' | 'BLOCKER' | 'BLOCKED_CELL' };
 
 /**
+ * Handles XOR interaction with pairwise operations to avoid incorrect merging.
+ * When an XOR piece is dropped, it interacts with each overlapping piece separately.
+ */
+function handleXORInteraction(allPieces: Piece[], droppedPiece: Piece): CollisionResult {
+    // Find all pieces that overlap with the dropped XOR piece
+    const overlappingPieces = allPieces.filter(p =>
+        p.type !== PieceType.BLOCKER && doPiecesOverlap(p, droppedPiece)
+    );
+
+    if (overlappingPieces.length === 0) {
+        // No overlaps, just add the piece
+        return { success: true, newPieces: [...allPieces, droppedPiece] };
+    }
+
+    // Keep track of pieces to remove and add
+    const overlappingIds = new Set(overlappingPieces.map(p => p.id));
+    const piecesToKeep = allPieces.filter(p => !overlappingIds.has(p.id));
+    const newPieces: Piece[] = [];
+
+    // Process each overlapping piece pairwise with the dropped piece
+    for (const existingPiece of overlappingPieces) {
+        // Determine bounds for this pair
+        const minX = Math.min(droppedPiece.position.x, existingPiece.position.x);
+        const minY = Math.min(droppedPiece.position.y, existingPiece.position.y);
+        const maxX = Math.max(
+            droppedPiece.position.x + droppedPiece.shape[0].length,
+            existingPiece.position.x + existingPiece.shape[0].length
+        );
+        const maxY = Math.max(
+            droppedPiece.position.y + droppedPiece.shape.length,
+            existingPiece.position.y + existingPiece.shape.length
+        );
+
+        const width = maxX - minX;
+        const height = maxY - minY;
+
+        // Apply XOR operation
+        const theyMinusDroppedGrid = createEmptyGrid(width, height);
+        mergeGrid(theyMinusDroppedGrid, existingPiece, minX, minY, 'SET');
+        mergeGrid(theyMinusDroppedGrid, droppedPiece, minX, minY, 'ZERO');
+
+        const droppedMinusThey = createEmptyGrid(width, height);
+        mergeGrid(droppedMinusThey, droppedPiece, minX, minY, 'SET');
+        mergeGrid(droppedMinusThey, existingPiece, minX, minY, 'ZERO');
+
+        // Vectorize the result
+        const components = [
+            ...findConnectedComponents(theyMinusDroppedGrid, { x: minX, y: minY, width, height }), 
+            ...findConnectedComponents(droppedMinusThey, { x: minX, y: minY, width, height })
+        ];
+
+        // Create new pieces with the existing piece's type (not XOR type)
+        for (const comp of components) {
+            newPieces.push({
+                id: crypto.randomUUID(),
+                type: existingPiece.type,  // Result uses existing piece's type
+                position: comp.position,
+                shape: comp.shape,
+                color: existingPiece.color
+            });
+        }
+    }
+
+    return { success: true, newPieces: [...piecesToKeep, ...newPieces] };
+}
+
+/**
  * Manages the collision of a dropped piece with the existing board state.
  * now accepts optional grid for blocked cells and placement validation.
  */
@@ -83,27 +150,32 @@ export function manageCollision(allPieces: Piece[], droppedPiece: Piece, grid?: 
         }
     }
 
-    // 1. Blocker Check (Diff Type Overlap OR any Blocker Overlap)
+    // 1. Blocker Check (Only BLOCKER pieces block overlaps)
     const blockers = allPieces.filter(p => {
-        const areBothRegular = p.type !== PieceType.BLOCKER && type !== PieceType.BLOCKER;
-        if (areBothRegular) {
-            // Regular pieces (UNION, XOR, INTERSECT) block each other if different types
-            return p.type !== type && doPiecesOverlap(p, droppedPiece);
-        } else {
-            // If either is a BLOCKER, they block EVERYTHING they overlap with
-            return doPiecesOverlap(p, droppedPiece);
-        }
+        // If either piece is a BLOCKER, they block EVERYTHING they overlap with
+        const hasBlocker = p.type === PieceType.BLOCKER || type === PieceType.BLOCKER;
+        return hasBlocker && doPiecesOverlap(p, droppedPiece);
     });
     if (blockers.length > 0) return { success: false, reason: 'BLOCKER' };
 
-    // 2. Merge Logic (Same Type Connect)
-    const sameTypePieces = allPieces.filter(p => p.type === type);
+    // 2. XOR Special Case: Pairwise interactions to avoid incorrect merging
+    if (type === PieceType.XOR) {
+        return handleXORInteraction(allPieces, droppedPiece);
+    }
+
+    // 3. Merge Logic for UNION/INTERSECT (All non-BLOCKER pieces can interact)
+    const nonBlockerPieces = allPieces.filter(p => p.type !== PieceType.BLOCKER);
 
     // Find connected cluster (Transitive closure from droppedPiece)
     // Seeds: [droppedPiece]
-    // Pool: sameTypePieces
-    const cluster = getConnectedCluster(droppedPiece, sameTypePieces);
+    // Pool: all non-BLOCKER pieces (different types can now interact)
+    const cluster = getConnectedCluster(droppedPiece, nonBlockerPieces);
     const clusterIds = new Set(cluster.map(p => p.id));
+
+    // Determine result type and color: use type from existing pieces in cluster (not dropped piece)
+    // If cluster has pieces, use the type of the first piece; otherwise use dropped piece type
+    const resultType = cluster.length > 0 ? cluster[0].type : type;
+    const resultColor = cluster.length > 0 ? cluster[0].color : droppedPiece.color;
 
     // Identify pieces effectively "Removed" from board (merged into new shapes)
     const piecesToKeep = allPieces.filter(p => !clusterIds.has(p.id));
@@ -123,10 +195,11 @@ export function manageCollision(allPieces: Piece[], droppedPiece: Piece, grid?: 
     const width = maxX - minX;
     const height = maxY - minY;
 
-    // Apply Op
+    // Apply Op (use dropped piece's operation type, not result type)
+    const operationType = droppedPiece.type;
     let mergedGrid: number[][];
 
-    if (type === PieceType.INTERSECT) {
+    if (operationType === PieceType.INTERSECT) {
         // AND Logic with Fallback: P1 & P2 & P3...
         // If result is EMPTY (meaning pieces just touch but don't overlap, or complex disjoint),
         // Fallback to UNION (Merge).
@@ -164,10 +237,10 @@ export function manageCollision(allPieces: Piece[], droppedPiece: Piece, grid?: 
             mergedGrid = intersectGrid;
         }
     } else {
-        // UNION / XOR Logic (Accumulative)
+        // UNION Logic (Accumulative)
         mergedGrid = createEmptyGrid(width, height);
         for (const p of fullCluster) {
-            mergeGrid(mergedGrid, p, minX, minY, type === PieceType.XOR ? 'XOR' : 'OR');
+            mergeGrid(mergedGrid, p, minX, minY, 'OR');
         }
     }
 
@@ -177,10 +250,10 @@ export function manageCollision(allPieces: Piece[], droppedPiece: Piece, grid?: 
     const newPieces: Piece[] = components.map((comp, index) => ({
         // Preserve original ID if it's the primary component
         id: (index === 0 && components.length === 1) ? droppedPiece.id : crypto.randomUUID(),
-        type: type,
+        type: resultType,  // Use result type (from existing pieces), not dropped piece type
         position: comp.position,
         shape: comp.shape,
-        color: droppedPiece.color
+        color: resultColor  // Use color from existing pieces, not dropped piece
     }));
 
     return { success: true, newPieces: [...piecesToKeep, ...newPieces] };
@@ -211,7 +284,7 @@ function getConnectedCluster(seed: Piece, pool: Piece[]): Piece[] {
     return cluster;
 }
 
-function mergeGrid(target: number[][], p: Piece, offsetX: number, offsetY: number, op: 'SET' | 'OR' | 'XOR') {
+function mergeGrid(target: number[][], p: Piece, offsetX: number, offsetY: number, op: 'SET' | 'OR' | 'XOR' | 'ZERO' ) {
     for (let r = 0; r < p.shape.length; r++) {
         for (let c = 0; c < p.shape[r].length; c++) {
             if (p.shape[r][c]) {
@@ -222,6 +295,7 @@ function mergeGrid(target: number[][], p: Piece, offsetX: number, offsetY: numbe
                     if (op === 'SET') target[gy][gx] = 1;
                     else if (op === 'OR') target[gy][gx] |= 1;
                     else if (op === 'XOR') target[gy][gx] ^= 1;
+                    else if (op === 'ZERO') target[gy][gx] = 0;
                 }
             }
         }
