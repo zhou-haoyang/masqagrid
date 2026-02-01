@@ -10,6 +10,8 @@ interface PieceRendererProps {
     dragRotation?: number;
     dragFlipped?: boolean;
     violatingCells?: Position[];
+    allowedCells?: Position[];
+    moveId?: number;
     onPointerDown?: (e: React.PointerEvent) => void;
     style?: React.CSSProperties;
 }
@@ -22,6 +24,8 @@ export const PieceRenderer: React.FC<PieceRendererProps> = ({
     dragRotation = 0,
     dragFlipped = false,
     violatingCells = [],
+    allowedCells = [],
+    moveId = 0,
     onPointerDown,
     style
 }) => {
@@ -64,6 +68,14 @@ export const PieceRenderer: React.FC<PieceRendererProps> = ({
             }}
             className="select-none"
         >
+            <style dangerouslySetInnerHTML={{
+                __html: `
+                @keyframes fadeInPiece {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
+                `
+            }} />
             <div
                 style={{
                     width: '100%',
@@ -91,6 +103,7 @@ export const PieceRenderer: React.FC<PieceRendererProps> = ({
                         const globalX = piece.position.x + c;
                         const globalY = piece.position.y + r;
                         const isThisCellViolating = violatingCells.some(vc => vc.x === globalX && vc.y === globalY);
+                        const isThisCellAllowed = allowedCells.some(ac => ac.x === globalX && ac.y === globalY);
 
                         return (
                             <div 
@@ -99,13 +112,15 @@ export const PieceRenderer: React.FC<PieceRendererProps> = ({
                                 style={{ 
                                     width: '100%', 
                                     height: '100%',
-                                    pointerEvents: isDragging ? 'none' : 'auto' // Interactive pixels
+                                    position: 'relative',
+                                    pointerEvents: isDragging ? 'none' : 'auto', // Interactive pixels
+                                    overflow: 'hidden'
                                 }}
                             >
                                 <div
                                     style={{
                                         backgroundColor: displayColor,
-                                        opacity: isThisCellViolating ? 0.6 : 1,
+                                        opacity: isThisCellViolating || isThisCellAllowed ? 0.6 : 1,
                                         width: '100%',
                                         height: '100%',
                                         boxSizing: 'border-box',

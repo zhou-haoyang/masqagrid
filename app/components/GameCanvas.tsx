@@ -366,6 +366,27 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level, onNextLevel, onRe
                     border = '2px solid rgba(0,0,0,0.1)';
                 }
 
+                const currentAllowedEmojis = new Set(winState.allowedStats.map(s => s.emoji));
+                const isAllowedSymbol = currentAllowedEmojis.has(symbol);
+                
+                // Check if this cell (x, y) is covered by any piece (excluding dragged piece for simplicity or including it if we want live feedback)
+                let isCovered = false;
+                for (const p of pieces) {
+                    // Skip checking for the dragged piece to avoid weirdness, or include it if you want the cell to pulse AS you drag over it
+                    if (
+                        x >= p.position.x &&
+                        x < p.position.x + p.shape[0].length &&
+                        y >= p.position.y &&
+                        y < p.position.y + p.shape.length
+                    ) {
+                        if (p.shape[y - p.position.y][x - p.position.x] === 1) {
+                            isCovered = true;
+                            break;
+                        }
+                    }
+                }
+
+                const isCoveredAllowed = isAllowedSymbol && isCovered;
                 const isViolating = winState.violatingCells.some(c => c.x === x && c.y === y);
                 const isResolving = resolvingCells.some(c => c.x === x && c.y === y);
 
@@ -385,17 +406,17 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level, onNextLevel, onRe
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 fontFamily: 'var(--font-emoji), var(--font-pixel)',
-                                zIndex: isViolating ? 6 : (cellType === '#' ? 5 : 0),
+                                zIndex: (isViolating || isCoveredAllowed) ? 6 : (cellType === '#' ? 5 : 0),
                                 boxSizing: 'border-box',
                                 boxShadow: cellType === '#' ? 'inset 2px 2px 0 rgba(255,255,255,0.1), inset -2px -2px 0 rgba(0,0,0,0.3)' : 'none',
                                 overflow: 'hidden', // Clip the ripple to the cell
                             }}
                         >
-                            {/* Violation Overlay */}
+                            {/* Violation Overlay (Red) */}
                             {isViolating && (
                                 <>
                                     {/* One-shot Ripple (Ring Shockwave) */}
-                                    <div key={`ripple-${moveId}`} className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+                                    <div key={`ripple-red-${moveId}`} className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
                                         <div className="w-2 h-2 rounded-full animate-ripple"
                                             style={{
                                                 background: 'radial-gradient(circle, transparent 20%, rgba(239,68,68,0.9) 40%, rgba(239,68,68,0) 70%)',
@@ -409,6 +430,30 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level, onNextLevel, onRe
                                         style={{
                                             opacity: 0,
                                             animation: 'fadeIn 0.5s ease-out forwards, pulsate-red 2s infinite 0.5s'
+                                        }}
+                                    />
+                                </>
+                            )}
+
+                            {/* Covered Allowed Overlay (Blue) */}
+                            {isCoveredAllowed && (
+                                <>
+                                    {/* One-shot Ripple */}
+                                    <div key={`ripple-blue-${moveId}`} className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+                                        <div className="w-2 h-2 rounded-full animate-ripple"
+                                            style={{
+                                                background: 'radial-gradient(circle, transparent 20%, rgba(24, 216, 241, 0.9) 40%, rgba(24, 216, 241, 0) 70%)',
+                                                animation: 'ripple-blue 1s ease-out 1 forwards'
+                                            }}
+                                        />
+                                    </div>
+
+                                    {/* Persistent Border */}
+                                    <div className="absolute inset-0 border-2 pointer-events-none z-10"
+                                        style={{
+                                            borderColor: 'rgba(24, 216, 241, 0.6)',
+                                            opacity: 0,
+                                            animation: 'fadeIn 0.5s ease-out forwards, pulsate-blue 2s infinite 0.5s'
                                         }}
                                     />
                                 </>
@@ -447,7 +492,16 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level, onNextLevel, onRe
                     50% { border-color: rgba(239, 68, 68, 0.7); box-shadow: inset 0 0 8px rgba(239, 68, 68, 0.3); }
                     100% { border-color: rgba(239, 68, 68, 0.3); box-shadow: inset 0 0 2px rgba(239, 68, 68, 0.1); }
                 }
+                @keyframes pulsate-blue {
+                    0% { border-color: rgba(24, 216, 241, 0.8); box-shadow: inset 0 0 4px rgba(24, 216, 241, 0.2), 0 0 4px rgba(24, 216, 241, 0.2); }
+                    50% { border-color: rgba(24, 216, 241, 1); box-shadow: inset 0 0 16px rgba(24, 216, 241, 0.4), 0 0 12px rgba(24, 216, 241, 0.6); }
+                    100% { border-color: rgba(24, 216, 241, 0.8); box-shadow: inset 0 0 4px rgba(24, 216, 241, 0.2), 0 0 4px rgba(24, 216, 241, 0.2); }
+                }
                 @keyframes ripple-red {
+                    0% { transform: scale(1); opacity: 0.8; }
+                    100% { transform: scale(12); opacity: 0; }
+                }
+                @keyframes ripple-blue {
                     0% { transform: scale(1); opacity: 0.8; }
                     100% { transform: scale(12); opacity: 0; }
                 }
@@ -612,22 +666,33 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level, onNextLevel, onRe
                 })()}
 
                 {/* Layer 2: Pieces */}
-                {pieces.map(piece => {
-                    const isDragging = piece.id === draggedPieceId;
-                    return (
-                        <PieceRenderer
-                            key={piece.id}
-                            piece={isDragging ? { ...piece, shape: draggedPieceShape || piece.shape } : piece}
-                            cellSize={CELL_SIZE}
-                            isDragging={isDragging}
-                            dragPosition={isDragging ? dragPosition : undefined}
-                            dragRotation={isDragging ? dragRotation : 0}
-                            dragFlipped={isDragging ? dragFlipped : false}
-                            violatingCells={winState.violatingCells}
-                            onPointerDown={isDragging ? undefined : (e: React.PointerEvent) => handlePointerDown(e, piece)}
-                        />
-                    );
-                })}
+                {(() => {
+                    // Identify all cells in the main region that contain emojis currently considered "allowed"
+                    const currentAllowedEmojis = new Set(winState.allowedStats.map(s => s.emoji));
+                    const allMainSymbols = getAllSymbolsWithCoords(regions, 'main-region');
+                    const allowedCellCoords = allMainSymbols
+                        .filter(s => currentAllowedEmojis.has(s.symbol))
+                        .map(s => ({ x: s.x, y: s.y }));
+
+                    return pieces.map(piece => {
+                        const isDragging = piece.id === draggedPieceId;
+                        return (
+                            <PieceRenderer
+                                key={piece.id}
+                                piece={isDragging ? { ...piece, shape: draggedPieceShape || piece.shape } : piece}
+                                cellSize={CELL_SIZE}
+                                isDragging={isDragging}
+                                dragPosition={isDragging ? dragPosition : undefined}
+                                dragRotation={isDragging ? dragRotation : 0}
+                                dragFlipped={isDragging ? dragFlipped : false}
+                                violatingCells={winState.violatingCells}
+                                allowedCells={isDragging ? [] : allowedCellCoords} // Don't do it for ghost piece as requested
+                                moveId={moveId}
+                                onPointerDown={isDragging ? undefined : (e: React.PointerEvent) => handlePointerDown(e, piece)}
+                            />
+                        );
+                    });
+                })()}
             </div>
 
             {/* Rotate/Flip Hints - Below game canvas */}
