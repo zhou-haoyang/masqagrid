@@ -5,7 +5,7 @@ export default <Level>{
     name: 'Encircled',
     width: 11,
     height: 20,
-    coveredAllowedSymbolLimit: 64,  // default to 0, adjust as needed
+    coveredAllowedSymbolLimit: 0,  // default to 0, adjust as needed
     grid: [
         "AA##MMM##DD",
         "A#MMMMMMM#D",
@@ -18,7 +18,7 @@ export default <Level>{
         "#MMMMMMMMM#",
         "D#MMMMMMM#D",
         "DD##MMM##DD",
-        "###########",
+        "##DD###DD##",
         "...........",
         "...........",
         "...........",
@@ -30,7 +30,7 @@ export default <Level>{
     ],
     mainSymbols: "🐺🐺🐺🐺🐑🐴🐑🐑🐴🐺🐺🐴🐑🐑🐺🐑🐑🐴🐺🐑🐴🐑🐑🐴🐑🐑🐴🐑🐺🐑🐑🐴🐑🐑🐴🐑🐑🐴🐺🐑🐴🐺🐑🐴🐴🐑🐴🐺🐑🐴🐺🐑🐴🐑🐑🐴🐑🐑🐴🐑🐺🐴🐑🐑🐴🐑🐴🐑🐑🐴🐺🐑🐑🐑🐺🐑🐑🐴🐺🐺🐴🐑🐑🐴🐑🐺🐺🐺🐺",
     allowedSymbols: "🐑🐴🐴",
-    disallowedSymbols: "🐺🐺🐺🐺🐺🐺🐺🐺🐺",
+    disallowedSymbols: "🐺🐺🐺🐺🐺🐺🐺🐺🐺🐺🐺🐺🐺",
     initialPieces: [
         {
             id: 'item-1769947116325-bdjrm5z',
