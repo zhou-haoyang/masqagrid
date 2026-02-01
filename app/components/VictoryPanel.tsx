@@ -9,6 +9,7 @@ interface VictoryPanelProps {
   hasNextLevel: boolean;
   onNextLevel: () => void;
   onReplay: () => void;
+  onBackToLevels: () => void;
 }
 
 export const VictoryPanel: React.FC<VictoryPanelProps> = ({
@@ -16,7 +17,8 @@ export const VictoryPanel: React.FC<VictoryPanelProps> = ({
   score,
   hasNextLevel,
   onNextLevel,
-  onReplay
+  onReplay,
+  onBackToLevels
 }) => {
   if (!isOpen) return null;
 
@@ -67,6 +69,13 @@ export const VictoryPanel: React.FC<VictoryPanelProps> = ({
             className="flex items-center justify-center gap-2 px-6 py-4 bg-gray-200 text-gray-900 hover:bg-gray-300 border-b-4 border-gray-400 active:border-b-0 active:translate-y-1 font-bold text-sm uppercase shadow-md transition-all"
           >
              Replay Level
+          </button>
+
+          <button
+            onClick={onBackToLevels}
+            className="flex items-center justify-center gap-2 px-6 py-4 bg-gray-800 text-white hover:bg-gray-700 border-b-4 border-black active:border-b-0 active:translate-y-1 font-bold text-sm uppercase shadow-md transition-all"
+          >
+             Back to Levels
           </button>
         </div>
       </div>

@@ -14,13 +14,15 @@ interface GameCanvasProps {
     level: Level;
     onNextLevel: () => void;
     onReplay: () => void;
-    onLevelComplete?: () => void;
+    onBackToLevels: () => void;
+    onLevelComplete?: (score: number) => void;
     hasNextLevel: boolean;
+    highScore?: number;
 }
 
 const CELL_SIZE = 40; // Pixels per cell
 
-export const GameCanvas: React.FC<GameCanvasProps> = ({ level, onNextLevel, onReplay, onLevelComplete, hasNextLevel }) => {
+export const GameCanvas: React.FC<GameCanvasProps> = ({ level, onNextLevel, onReplay, onBackToLevels, onLevelComplete, hasNextLevel, highScore }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const [pieces, setPieces] = useState<Piece[]>(initialPiecesWithIds(level.initialPieces));
     const [history, setHistory] = useState<Piece[][]>([]);
@@ -56,7 +58,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level, onNextLevel, onRe
 
             // Notify parent that level is completed
             if (onLevelComplete) {
-                onLevelComplete();
+                onLevelComplete(score);
             }
         }
     }, [winState.isWin, winState.coveredAllowedScore, finalScore, regions, onLevelComplete]);
@@ -510,6 +512,15 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level, onNextLevel, onRe
                                 INITIAL SCORE: {initialScore}
                             </span>
                         </div>
+
+                        {/* Personal Best Display */}
+                        {highScore !== undefined && highScore > 0 && (
+                            <div className="mt-2 px-2 py-1 bg-yellow-50 border-2 border-yellow-300 font-bold text-yellow-700">
+                                <span className="text-xs">
+                                    PERSONAL BEST: {highScore}
+                                </span>
+                            </div>
+                        )}
                     </div>
                 )}
 
@@ -640,6 +651,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level, onNextLevel, onRe
                 hasNextLevel={hasNextLevel}
                 onNextLevel={onNextLevel}
                 onReplay={onReplay}
+                onBackToLevels={onBackToLevels}
             />
         </div>
     );
