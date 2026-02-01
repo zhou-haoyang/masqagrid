@@ -24,13 +24,13 @@ export default <Level>{
             id: 'item-1769943139530-omf1kzd',
             type: PieceType.UNION,
             position: { x: 1, y: 6 },
-            shape: [[1], [1]]
+            shape: [[1, 1]]
         },
         {
             id: 'item-1769943310865-umjor9f',
             type: PieceType.UNION,
-            position: { x: 2, y: 6 },
-            shape: [[1], [1]]
+            position: { x: 1, y: 7 },
+            shape: [[1, 1]]
         },
         {
             id: 'item-1769943316814-c581vet',
