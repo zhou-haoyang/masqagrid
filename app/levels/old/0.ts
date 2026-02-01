@@ -1,4 +1,4 @@
-import { Level, PieceType } from '../types';
+import { Level, PieceType } from '../../types';
 
 export default <Level>{
     id: '000',
