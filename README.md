@@ -1,36 +1,86 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Masqagrid
+
+Masqagrid is a Boolean logic puzzle game created during **Global Game Jam 2026** at the **ETH Zurich** site. Players drag shape pieces onto a grid to cover and uncover symbols, aiming to satisfy specific win conditions. It combines spatial reasoning with logical operations.
+
+[View Game Site](https://globalgamejam.org/games/2026/masqagrid-2)
+
+## Features
+
+- **Boolean Logic Mechanic**: Merge pieces using UNION (OR), XOR (Exclusive OR), and INTERSECT (AND) operations.
+- **Dynamic Rules**: Satisfy dynamic win conditions based on "Allowed" and "Disallowed" symbol regions.
+- **Puzzle Elements**:
+  - **Main Region**: The primary puzzle area.
+  - **Inventory**: Starting area for pieces.
+  - **Rule Regions**: Visual constraints for victory.
+- **Tech Stack**: Built with Next.js 16, React 19, TypeScript, TailwindCSS, and Electron.
+
+## Tech Stack
+
+- **Framework**: [Next.js](https://nextjs.org) (App Router)
+- **Runtime**: [Electron](https://www.electronjs.org/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **Logic**: Custom game engine for boolean shape operations and collision detection.
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js
+- pnpm (recommended), npm, or yarn
+
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone <repository-url>
+   cd masqagrid
+   ```
+
+2. Install dependencies:
+   ```bash
+   pnpm install
+   ```
+
+### Running Locally
+
+To start the development server (Web):
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+To open the Electron app in development mode:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run dev:electron
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Building
 
-## Learn More
+To build the application for production:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+# Build for web
+npm run build:nextjs
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Build for Electron (Mac)
+npm run build:mac
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# Build for Electron (Windows)
+npm run build:win
 
-## Deploy on Vercel
+# Build for Electron (Linux)
+npm run build:linux
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Controls
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Drag & Drop**: Move pieces from the inventory to the grid.
+- **R**: Rotate the currently dragged piece 90° clockwise.
+- **F**: Flip the currently dragged piece horizontally.
+- **Z**: Undo the last move.
+- **C**: Reset the level.
+
+## License
+
+This project is licensed under the [LGPL-2.1 License](LICENSE).
