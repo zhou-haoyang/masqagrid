@@ -64,6 +64,14 @@ export default function About() {
                     All rights reserved.
                   </div>
                 </div>
+                <div>
+                  <p className="mb-2">
+                    We use the Press Start 2P Font, licensed under the Open Font License:
+                  </p>
+                  <div className="text-sm font-mono bg-black/10 dark:bg-white/10 p-3 rounded">
+                    Copyright (c) 2012 The Press Start 2P Project Authors (cody@zone38.net)
+                  </div>
+                </div>
               </div>
             </section>
 
