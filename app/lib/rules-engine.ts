@@ -70,6 +70,9 @@ export interface WinState {
     violatingCells: Position[]; // Coordinates of cells causing violations
     allowedStats: EmojiStats[]; // Stats for allowed emojis
     disallowedStats: EmojiStats[]; // Stats for disallowed emojis
+    coveredAllowedScore: number; // Sum of (coveredInMain × totalInRegion) for all allowed symbols
+    coveredAllowedLimit?: number; // Maximum allowed score (from level config)
+    exceededLimit: boolean; // True if score exceeds limit
 }
 
 /**
@@ -96,7 +99,11 @@ export function getAllSymbolsWithCoords(
     return all;
 }
 
-export function checkWinCondition(regions: Region[], pieces: Piece[]): WinState {
+export function checkWinCondition(
+    regions: Region[],
+    pieces: Piece[],
+    coveredAllowedLimit?: number
+): WinState {
     // 1. Determine Rules
     const allowedSymbols = new Set(getVisibleSymbols(regions, pieces, 'allowed-region'));
     const disallowedSymbols = new Set(getVisibleSymbols(regions, pieces, 'disallowed-region'));
@@ -142,12 +149,22 @@ export function checkWinCondition(regions: Region[], pieces: Piece[]): WinState 
     const allowedStats = calculateEmojiStats(regions, pieces, 'allowed-region', allowedSymbols, true); // true = covered
     const disallowedStats = calculateEmojiStats(regions, pieces, 'disallowed-region', disallowedSymbols, false); // false = uncovered
 
+    // 5. Calculate covered allowed score: sum of (coveredInMain × totalInRegion)
+    const coveredAllowedScore = allowedStats.reduce(
+        (sum, stat) => sum + (stat.countInMain * stat.totalInRegion),
+        0
+    );
+    const exceededLimit = coveredAllowedLimit !== undefined && coveredAllowedScore > coveredAllowedLimit;
+
     return {
-        isWin: violatingCells.length === 0,
+        isWin: violatingCells.length === 0 && !exceededLimit,
         violations: Array.from(violations),
         violatingCells,
         allowedStats,
-        disallowedStats
+        disallowedStats,
+        coveredAllowedScore,
+        coveredAllowedLimit,
+        exceededLimit
     };
 }
 

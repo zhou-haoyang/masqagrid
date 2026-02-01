@@ -25,7 +25,10 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
         violations: [],
         violatingCells: [],
         allowedStats: [],
-        disallowedStats: []
+        disallowedStats: [],
+        coveredAllowedScore: 0,
+        coveredAllowedLimit: level.coveredAllowedSymbolLimit,
+        exceededLimit: false
     });
 
     // Parse level grid into runtime structures
@@ -206,7 +209,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
 
             // Check Win [NEW]
             // We need to wait for state update? No, we have the new pieces.
-            setWinState(checkWinCondition(regions, result.newPieces));
+            setWinState(checkWinCondition(regions, result.newPieces, level.coveredAllowedSymbolLimit));
         } else {
             // Invalid move (Blocker collision etc) - Snap back is handled by state reset
         }
@@ -231,7 +234,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
         setHistory(newHistory);
         if (previous) {
             setPieces(previous);
-            setWinState(checkWinCondition(regions, previous)); // Re-check
+            setWinState(checkWinCondition(regions, previous, level.coveredAllowedSymbolLimit)); // Re-check
             setMoveId(m => m + 1); // Trigger animation
         }
     };
@@ -241,14 +244,14 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
             const initial = initialPiecesWithIds(level.initialPieces);
             setPieces(initial);
             setHistory([]);
-            setWinState(checkWinCondition(regions, initial)); // Re-check
+            setWinState(checkWinCondition(regions, initial, level.coveredAllowedSymbolLimit)); // Re-check
             setMoveId(m => m + 1); // Trigger animation
         }
     };
 
     // Check initial state on mount
     useEffect(() => {
-        setWinState(checkWinCondition(regions, pieces));
+        setWinState(checkWinCondition(regions, pieces, level.coveredAllowedSymbolLimit));
     }, []); // Run once
 
     // [NEW] Track resolving cells for exit animation
@@ -433,7 +436,6 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
                 }
             `}} />
             {/* Status Panel */}
-            {/* Status Panel */}
             <div className={`fixed top-4 right-4 p-4 border-4 shadow-[4px_4px_0_0_rgba(0,0,0,0.2)] transition-all z-50 ${winState.isWin ? 'bg-green-100 border-green-600' : 'bg-[var(--panel-bg)] border-[var(--panel-border)]'
                 }`}>
                 <div className="flex items-center gap-4 mb-2">
@@ -461,6 +463,19 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
                                 </div>
                             ))}
                         </div>
+
+                        {/* Covered Allowed Limit Display */}
+                        {winState.coveredAllowedLimit !== undefined && (
+                            <div className={`mt-2 px-2 py-1 border-2 font-bold ${
+                                winState.exceededLimit
+                                    ? 'bg-red-50 border-red-500 text-red-700'
+                                    : 'bg-green-50 border-green-300 text-green-700'
+                            }`}>
+                                <span className="text-xs">
+                                    TOTAL: {winState.coveredAllowedScore} / {winState.coveredAllowedLimit}
+                                </span>
+                            </div>
+                        )}
                     </div>
                 )}
 

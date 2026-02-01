@@ -168,6 +168,7 @@ export default <Level>{
     name: '${level.name || `Level ${levelNumber}`}',
     width: ${level.width},
     height: ${level.height},
+    coveredAllowedSymbolLimit: 0,  // default to 0, adjust as needed
     grid: [
 ${gridCode}
     ],

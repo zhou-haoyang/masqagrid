@@ -39,6 +39,6 @@ export interface Level {
     mainSymbols: string; // Symbols for M cells in reading order
     allowedSymbols: string; // Symbols for A/a cells in reading order
     disallowedSymbols: string; // Symbols for D/d cells in reading order
-    minAllowedSymbols?: number; 
+    coveredAllowedSymbolLimit?: number; 
     initialPieces: Piece[];
 }
