@@ -1,6 +1,6 @@
 # Masqagrid
 
-Masqagrid is a Boolean logic puzzle game created during **Global Game Jam 2026** at the **ETH Zurich** site. Players drag shape pieces onto a grid to cover and uncover symbols, aiming to satisfy specific win conditions. It combines spatial reasoning with logical operations.
+Masqagrid is a Boolean logic puzzle game created during **Global Game Jam 2026** at the **ETH Zurich** site. Players drag shape pieces onto a grid to cover and uncover symbols, aiming to satisfy specific win conditions.
 
 [View Game Site](https://globalgamejam.org/games/2026/masqagrid-2)
 
@@ -16,10 +16,8 @@ Masqagrid is a Boolean logic puzzle game created during **Global Game Jam 2026**
 
 ## Tech Stack
 
-- **Framework**: [Next.js](https://nextjs.org) (App Router)
-- **Runtime**: [Electron](https://www.electronjs.org/)
+- **Framework**: [Next.js](https://nextjs.org) (App Router) & [Electron](https://www.electronjs.org/)
 - **Styling**: [Tailwind CSS](https://tailwindcss.com/)
-- **Logic**: Custom game engine for boolean shape operations and collision detection.
 
 ## Getting Started
 
@@ -80,6 +78,25 @@ npm run build:linux
 - **F**: Flip the currently dragged piece horizontally.
 - **Z**: Undo the last move.
 - **C**: Reset the level.
+
+## Level Editor
+
+Masqagrid includes a built-in level editor for creating custom puzzles.
+
+### Accessing the Editor
+
+Navigate to `/editor` in your browser (e.g., `http://localhost:3000/editor`).
+
+### Creating & Adding Levels
+
+1.  **Design**: Use the editor tools to paint the grid, set symbol streams, and place initial pieces.
+2.  **Validate**: Click "Validate" to ensure the level is solvable and rules are consistent.
+3.  **Export**: Click "Export" to generate the level code.
+4.  **Save**: Download the generated `.ts` file or copy the code.
+5.  **Add to Game**: Place the file in the `app/levels/` directory.
+    *   The game automatically loads all `.ts` files in this directory.
+    *   No manual registration in `index.ts` is required.
+
 
 ## License
 
