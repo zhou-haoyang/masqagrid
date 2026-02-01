@@ -45,6 +45,15 @@ export default function About() {
 
             <section>
               <h2 className="text-2xl font-bold mb-3 uppercase" style={{ fontFamily: 'var(--font-pixel)' }}>
+                Special Thanks
+              </h2>
+              <p className="text-lg leading-relaxed">
+                Co-developed with Antigravity and Claude.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-2xl font-bold mb-3 uppercase" style={{ fontFamily: 'var(--font-pixel)' }}>
                 Licenses
               </h2>
               <div className="space-y-4 text-lg leading-relaxed">
