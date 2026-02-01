@@ -47,9 +47,24 @@ export default function About() {
               <h2 className="text-2xl font-bold mb-3 uppercase" style={{ fontFamily: 'var(--font-pixel)' }}>
                 Licenses
               </h2>
-              <p className="text-lg leading-relaxed">
-
-              </p>
+              <div className="space-y-4 text-lg leading-relaxed">
+                <p>
+                  The game content is licensed under CC-BY-SA.
+                </p>
+                <p>
+                  The source code is released under the LGPL 2.1 license.
+                </p>
+                <div>
+                  <p className="mb-2">
+                    We use the SerenityOS Emoji Font, which is distributed under the BSD 2-Clause License:
+                  </p>
+                  <div className="text-sm font-mono bg-black/10 dark:bg-white/10 p-3 rounded">
+                    Copyright (c) 2018-2023, the SerenityOS developers.<br />
+                    Copyright (c) 2022-2023, Gegga Thor &lt;xexxa@serenityos.org&gt;<br />
+                    All rights reserved.
+                  </div>
+                </div>
+              </div>
             </section>
 
           </div>
