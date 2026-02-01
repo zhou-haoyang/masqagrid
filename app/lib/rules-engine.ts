@@ -145,7 +145,7 @@ export function checkWinCondition(
 
     // 5. Calculate covered allowed score: sum of (coveredInMain × totalInAllowedRegion) for all emojis
     const coveredAllowedScore = calculateCoveredScore(regions, pieces);
-    const exceededLimit = coveredAllowedLimit !== undefined && coveredAllowedScore > coveredAllowedLimit;
+    const exceededLimit = coveredAllowedLimit !== undefined && coveredAllowedLimit > 0 && coveredAllowedScore > coveredAllowedLimit;
     console.log('Covered Allowed Score:', coveredAllowedScore, 'Limit:', coveredAllowedLimit, 'Exceeded:', exceededLimit);
 
     return {
