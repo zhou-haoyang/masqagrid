@@ -3,12 +3,17 @@
   "version": "0.1.0",
   "private": true,
   "main": "dist-electron/main.js",
+  "author": {
+    "name": "Desmond Liu",
+    "email": "desmondzyliu@gmail.com"
+   },
   "scripts": {
     "dev": "next dev",
     "dev:electron": "concurrently \"cross-env NODE_ENV=development next dev\" \"wait-on http://localhost:3000 && cross-env NODE_ENV=development electron .\"",
     "build": "npm run build:electron",
     "build:web": "next build",
     "build:nextjs": "cross-env NODE_ENV=production next build",
+    "build:nextjs-des": "cross-env NODE_ENV=production DESMOND_BUILD=true next build",
     "build:electron-main": "tsc -p electron/tsconfig.json",
     "build:electron": "npm run build:nextjs && npm run build:electron-main && electron-builder",
     "build:mac": "npm run build:nextjs && npm run build:electron-main && electron-builder --mac",
