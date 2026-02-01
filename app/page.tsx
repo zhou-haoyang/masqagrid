@@ -27,6 +27,9 @@ export default function Home() {
     highScores: {}
   });
 
+  const [hasLoaded, setHasLoaded] = useState(false);
+
+
   // Load progress from localStorage on mount
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
@@ -43,12 +46,15 @@ export default function Home() {
         console.error('Failed to parse saved progress:', e);
       }
     }
+    setHasLoaded(true);
   }, []);
 
   // Save progress to localStorage whenever it changes
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
-  }, [progress]);
+    if (hasLoaded) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+    }
+  }, [progress, hasLoaded]);
 
   // Get current level (with fallback)
   const currentLevelData = selectedLevelId ? getLevelById(selectedLevelId) : null;

@@ -27,8 +27,7 @@ export default function About() {
           <div className="space-y-6 text-[var(--foreground)]">
             <section>
               <p className="text-lg leading-relaxed">
-                This is from Global Game Jam 2026 ETH Zurich site.
-                We are a passionate team of PhD students from ETH Zurich.
+                This is from the Global Game Jam 2026 ETH Zurich site. We are a passionate team of PhD students from ETH Zurich.
               </p>
             </section>
 
