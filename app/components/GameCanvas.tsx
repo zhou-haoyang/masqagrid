@@ -356,7 +356,6 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level, onNextLevel, onRe
                 } else if (cellType === '#') {
                     bgColor = 'var(--color-wall)';
                     bgImage = 'repeating-linear-gradient(45deg, var(--color-wall-accent) 0, var(--color-wall-accent) 4px, var(--color-wall) 4px, var(--color-wall) 8px)';
-                    border = '2px solid var(--foreground)';
                 } else if (cellType === 'a') {
                     bgColor = 'var(--color-region-grass)';
                     bgImage = 'repeating-linear-gradient(45deg, rgba(0,0,0,0.05) 0, rgba(0,0,0,0.05) 2px, transparent 2px, transparent 10px)';
@@ -385,9 +384,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level, onNextLevel, onRe
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                fontSize: '16px',
-                                fontFamily: 'var(--font-pixel)',
-                                color: 'var(--foreground)',
+                                fontFamily: 'var(--font-emoji), var(--font-pixel)',
                                 zIndex: isViolating ? 6 : (cellType === '#' ? 5 : 0),
                                 boxSizing: 'border-box',
                                 boxShadow: cellType === '#' ? 'inset 2px 2px 0 rgba(255,255,255,0.1), inset -2px -2px 0 rgba(0,0,0,0.3)' : 'none',
@@ -484,7 +481,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level, onNextLevel, onRe
                         <div className="flex flex-col gap-1">
                             {winState.allowedStats.map(stat => (
                                 <div key={stat.emoji} className="px-2 py-1 bg-green-50 border-2 border-green-300 font-bold flex items-center gap-2">
-                                    <span className="text-base">{stat.emoji}</span>
+                                    <span className="text-base font-emoji">{stat.emoji}</span>
                                     <span className="text-gray-600">
                                         {stat.countInMain} × {stat.totalInRegion}
                                     </span>
@@ -494,11 +491,10 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level, onNextLevel, onRe
 
                         {/* Covered Allowed Limit Display */}
                         {winState.coveredAllowedLimit !== undefined && (
-                            <div className={`mt-2 px-2 py-1 border-2 font-bold ${
-                                winState.exceededLimit
-                                    ? 'bg-red-50 border-red-500 text-red-700'
-                                    : 'bg-green-50 border-green-300 text-green-700'
-                            }`}>
+                            <div className={`mt-2 px-2 py-1 border-2 font-bold ${winState.exceededLimit
+                                ? 'bg-red-50 border-red-500 text-red-700'
+                                : 'bg-green-50 border-green-300 text-green-700'
+                                }`}>
                                 <span className="text-xs">
                                     TOTAL: {winState.coveredAllowedScore} / {winState.coveredAllowedLimit}
                                 </span>
@@ -530,7 +526,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level, onNextLevel, onRe
                         <div className="flex flex-col gap-1">
                             {winState.disallowedStats.map(stat => (
                                 <div key={stat.emoji} className="px-2 py-1 bg-red-50 border-2 border-red-300 font-bold flex items-center gap-2">
-                                    <span className="text-base">{stat.emoji}</span>
+                                    <span className="text-base font-emoji">{stat.emoji}</span>
                                     <span className="text-gray-600">{stat.countInMain}</span>
                                 </div>
                             ))}
@@ -635,9 +631,8 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level, onNextLevel, onRe
             </div>
 
             {/* Rotate/Flip Hints - Below game canvas */}
-            <div className={`mt-4 flex items-center gap-2 px-4 py-3 bg-[var(--panel-bg)] text-[var(--panel-text)] border-2 border-[var(--panel-border)] border-b-4 text-xs font-bold shadow-md transition-opacity ${
-                draggedPieceId ? 'opacity-100' : 'opacity-0 pointer-events-none'
-            }`}>
+            <div className={`mt-4 flex items-center gap-2 px-4 py-3 bg-[var(--panel-bg)] text-[var(--panel-text)] border-2 border-[var(--panel-border)] border-b-4 text-xs font-bold shadow-md transition-opacity ${draggedPieceId ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                }`}>
                 <RotateCw size={14} /> <span>Rotate: R</span>
                 <span className="w-0.5 h-4 bg-gray-300 mx-2" />
                 <FlipHorizontal size={14} /> <span>Flip: F</span>
