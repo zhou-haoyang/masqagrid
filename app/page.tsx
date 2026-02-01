@@ -118,7 +118,7 @@ export default function Home() {
         {/* Unlock All Button */}
         <button
           onClick={handleUnlockAll}
-          className="fixed top-4 right-4 z-50 flex items-center gap-2 px-3 py-2 bg-amber-500 border-2 border-amber-700 shadow-[2px_2px_0_0_rgba(0,0,0,0.2)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,0.3)] active:shadow-none active:translate-x-1 active:translate-y-1 transition-all text-white font-bold text-xs"
+          className="fixed top-4 right-4 z-50 flex items-center gap-2 px-3 py-2 bg-gray-300 border-2 border-gray-400 shadow-[2px_2px_0_0_rgba(0,0,0,0.2)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,0.3)] active:shadow-none active:translate-x-1 active:translate-y-1 transition-all text-white font-bold text-xs"
           style={{ fontFamily: 'var(--font-pixel)' }}
         >
           <Unlock size={14} />

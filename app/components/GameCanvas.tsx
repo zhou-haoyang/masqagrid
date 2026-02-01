@@ -548,18 +548,12 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level, onNextLevel, onRe
                 )}
             </div>
 
-            {/* Controls */}
-            {/* Controls */}
-            <div className="flex gap-4 mb-4">
+            {/* Controls - Positioned at bottom center */}
+            <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 flex gap-4">
                 <button onClick={handleUndo} disabled={history.length === 0}
                     className="flex items-center gap-2 px-4 py-3 bg-gray-800 text-white hover:bg-gray-700 disabled:opacity-50 border-b-4 border-gray-950 active:border-b-0 active:translate-y-1 font-bold text-xs uppercase shadow-md transition-all">
                     <Undo2 size={16} /> Undo (Z)
                 </button>
-                <div className="flex items-center gap-2 px-4 py-3 bg-[var(--panel-bg)] text-[var(--panel-text)] border-2 border-[var(--panel-border)] border-b-4 text-xs font-bold shadow-md">
-                    <RotateCw size={14} /> <span>Rotate: R</span>
-                    <span className="w-0.5 h-4 bg-gray-300 mx-2" />
-                    <FlipHorizontal size={14} /> <span>Flip: F</span>
-                </div>
                 <button onClick={handleReset}
                     className="flex items-center gap-2 px-4 py-3 bg-gray-200 text-gray-900 hover:bg-gray-300 border-b-4 border-gray-400 active:border-b-0 active:translate-y-1 font-bold text-xs uppercase shadow-md transition-all">
                     <RefreshCcw size={16} /> Reset (C)
@@ -628,6 +622,15 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level, onNextLevel, onRe
                         />
                     );
                 })}
+            </div>
+
+            {/* Rotate/Flip Hints - Below game canvas */}
+            <div className={`mt-4 flex items-center gap-2 px-4 py-3 bg-[var(--panel-bg)] text-[var(--panel-text)] border-2 border-[var(--panel-border)] border-b-4 text-xs font-bold shadow-md transition-opacity ${
+                draggedPieceId ? 'opacity-100' : 'opacity-0 pointer-events-none'
+            }`}>
+                <RotateCw size={14} /> <span>Rotate: R</span>
+                <span className="w-0.5 h-4 bg-gray-300 mx-2" />
+                <FlipHorizontal size={14} /> <span>Flip: F</span>
             </div>
 
             {/* Victory Panel */}
