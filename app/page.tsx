@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { GameCanvas } from './components/GameCanvas';
 import { ThemeToggle } from './components/ThemeToggle';
 import { getLevelById, DEFAULT_LEVEL, LEVELS } from './levels';
-import { Play, ArrowLeft, Unlock, Lock, RefreshCcw } from 'lucide-react';
+import { Play, ArrowLeft, Unlock, Lock, RefreshCcw, Info } from 'lucide-react';
 
 const STORAGE_KEY = 'masqagrid_progress';
 
@@ -170,9 +171,17 @@ export default function Home() {
           <h1 className="text-6xl font-bold text-[var(--foreground)] mb-4 tracking-tight" style={{ fontFamily: 'var(--font-pixel)' }}>
             MASQAGRID
           </h1>
-          <p className="text-lg text-[var(--foreground)] opacity-70 max-w-md mx-auto">
+          <p className="text-lg text-[var(--foreground)] opacity-70 max-w-md mx-auto mb-4">
             Mask symbols with boolean logic pieces to solve puzzles
           </p>
+          <Link
+            href="/about"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--panel-bg)] border-2 border-[var(--panel-border)] shadow-[2px_2px_0_0_rgba(0,0,0,0.2)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,0.3)] active:shadow-none active:translate-x-1 active:translate-y-1 transition-all text-[var(--panel-text)] font-bold text-sm"
+            style={{ fontFamily: 'var(--font-pixel)' }}
+          >
+            <Info size={16} />
+            ABOUT US
+          </Link>
         </div>
 
         {/* Level Selection Grid */}

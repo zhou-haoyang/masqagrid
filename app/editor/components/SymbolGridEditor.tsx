@@ -93,9 +93,8 @@ export function SymbolGridEditor({ region, onUpdate }: SymbolGridEditorProps) {
                 onChange={(e) => handleSymbolChange(r, c, e.target.value)}
                 draggable={isDraggable && symbol !== ''}
                 onDragStart={() => handleDragStart(r, c, symbol)}
-                className={`w-full h-10 text-center border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${
-                  isDraggable && symbol !== '' ? 'cursor-move' : ''
-                }`}
+                className={`w-full h-10 text-center border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 font-emoji ${isDraggable && symbol !== '' ? 'cursor-move' : ''
+                  }`}
                 placeholder="·"
                 maxLength={2}
                 title={
