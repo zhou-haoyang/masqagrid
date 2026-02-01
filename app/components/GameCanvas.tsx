@@ -1,25 +1,30 @@
 'use client';
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { Level, Piece, PieceType } from '../types';
 import { manageCollision } from '../lib/game-engine';
 import { rotateMatrix90, flipMatrixHorizontal } from '../lib/grid-utils';
 import { parseLevel } from '../lib/level-parser';
-import { checkWinCondition, WinState } from '../lib/rules-engine'; // [NEW]
+import { checkWinCondition, WinState, getAllSymbolsWithCoords, calculateInitialScore } from '../lib/rules-engine'; // [NEW]
 import { PieceRenderer } from './PieceRenderer';
+import { VictoryPanel } from './VictoryPanel';
 import { RefreshCcw, Undo2, Trophy, AlertTriangle, RotateCw, FlipHorizontal } from 'lucide-react'; // Added icons
 
 interface GameCanvasProps {
     level: Level;
+    onNextLevel: () => void;
+    onReplay: () => void;
+    hasNextLevel: boolean;
 }
 
 const CELL_SIZE = 40; // Pixels per cell
 
-export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
+export const GameCanvas: React.FC<GameCanvasProps> = ({ level, onNextLevel, onReplay, hasNextLevel }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const [pieces, setPieces] = useState<Piece[]>(initialPiecesWithIds(level.initialPieces));
     const [history, setHistory] = useState<Piece[][]>([]);
     const [moveId, setMoveId] = useState(0); // Trigger animation sync
+    const [finalScore, setFinalScore] = useState<number | null>(null);
     const [winState, setWinState] = useState<WinState>({
         isWin: false,
         violations: [],
@@ -34,6 +39,21 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
     // Parse level grid into runtime structures
     const parsed = parseLevel(level);
     const { regions, symbolMap, gridCells } = parsed;
+
+    // Calculate initial score (maximum possible score)
+    const initialScore = useMemo(() => calculateInitialScore(regions), [regions]);
+
+    // Calculate final score when player wins
+    useEffect(() => {
+        if (winState.isWin && finalScore === null) {
+            const maxScore = calculateInitialScore(regions);
+            const score = maxScore - winState.coveredAllowedScore;
+            console.log('Max Score:', maxScore);
+            console.log('Covered Allowed Score:', winState.coveredAllowedScore);
+            console.log('Final Score Calculated:', score);
+            setFinalScore(score);
+        }
+    }, [winState.isWin, winState.coveredAllowedScore, finalScore, regions]);
 
     // Drag State
     const [draggedPieceId, setDraggedPieceId] = useState<string | null>(null);
@@ -246,6 +266,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
             setHistory([]);
             setWinState(checkWinCondition(regions, initial, level.coveredAllowedSymbolLimit)); // Re-check
             setMoveId(m => m + 1); // Trigger animation
+            setFinalScore(null); // Reset score
         }
     };
 
@@ -476,6 +497,13 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
                                 </span>
                             </div>
                         )}
+
+                        {/* Initial Score Display */}
+                        <div className="mt-2 px-2 py-1 bg-blue-50 border-2 border-blue-300 font-bold text-blue-700">
+                            <span className="text-xs">
+                                INITIAL SCORE: {initialScore}
+                            </span>
+                        </div>
                     </div>
                 )}
 
@@ -595,6 +623,15 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level }) => {
                     );
                 })}
             </div>
+
+            {/* Victory Panel */}
+            <VictoryPanel
+                isOpen={winState.isWin}
+                score={finalScore || 0}
+                hasNextLevel={hasNextLevel}
+                onNextLevel={onNextLevel}
+                onReplay={onReplay}
+            />
         </div>
     );
 };

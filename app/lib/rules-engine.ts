@@ -137,24 +137,16 @@ export function checkWinCondition(
             violations.add(item.symbol);
             violatingCells.push({ x: item.x, y: item.y });
         }
-
-        // Rule B: Allowed symbols MUST NOT be covered
-        if (isCovered && allowedSymbols.has(item.symbol)) {
-            violations.add(item.symbol);
-            violatingCells.push({ x: item.x, y: item.y });
-        }
     }
 
     // 4. Calculate emoji statistics
     const allowedStats = calculateEmojiStats(regions, pieces, 'allowed-region', allowedSymbols, true); // true = covered
     const disallowedStats = calculateEmojiStats(regions, pieces, 'disallowed-region', disallowedSymbols, false); // false = uncovered
 
-    // 5. Calculate covered allowed score: sum of (coveredInMain × totalInRegion)
-    const coveredAllowedScore = allowedStats.reduce(
-        (sum, stat) => sum + (stat.countInMain * stat.totalInRegion),
-        0
-    );
+    // 5. Calculate covered allowed score: sum of (coveredInMain × totalInAllowedRegion) for all emojis
+    const coveredAllowedScore = calculateCoveredScore(regions, pieces);
     const exceededLimit = coveredAllowedLimit !== undefined && coveredAllowedScore > coveredAllowedLimit;
+    console.log('Covered Allowed Score:', coveredAllowedScore, 'Limit:', coveredAllowedLimit, 'Exceeded:', exceededLimit);
 
     return {
         isWin: violatingCells.length === 0 && !exceededLimit,
@@ -166,6 +158,90 @@ export function checkWinCondition(
         coveredAllowedLimit,
         exceededLimit
     };
+}
+
+/**
+ * Calculates the covered score: for each emoji, count covered in main × count in allowed region
+ */
+function calculateCoveredScore(regions: Region[], pieces: Piece[]): number {
+    // Get all symbols in main and allowed regions
+    const allMainSymbols = getAllSymbolsWithCoords(regions, 'main-region');
+    const allAllowedSymbols = getAllSymbolsWithCoords(regions, 'allowed-region');
+
+    // Count occurrences of each emoji in allowed region
+    const allowedCounts = new Map<string, number>();
+    for (const item of allAllowedSymbols) {
+        allowedCounts.set(item.symbol, (allowedCounts.get(item.symbol) || 0) + 1);
+    }
+
+    // Count covered occurrences of each emoji in main region
+    const coveredCounts = new Map<string, number>();
+    for (const item of allMainSymbols) {
+        // Check if this cell is covered by any piece
+        let isCovered = false;
+        for (const p of pieces) {
+            if (
+                item.x >= p.position.x &&
+                item.x < p.position.x + p.shape[0].length &&
+                item.y >= p.position.y &&
+                item.y < p.position.y + p.shape.length
+            ) {
+                if (p.shape[item.y - p.position.y][item.x - p.position.x] === 1) {
+                    isCovered = true;
+                    break;
+                }
+            }
+        }
+
+        if (isCovered) {
+            coveredCounts.set(item.symbol, (coveredCounts.get(item.symbol) || 0) + 1);
+        }
+    }
+
+    // Calculate score: sum of (covered in main × count in allowed) for each emoji
+    let score = 0;
+    const allEmojis = new Set([...allowedCounts.keys(), ...coveredCounts.keys()]);
+    for (const emoji of allEmojis) {
+        const coveredInMain = coveredCounts.get(emoji) || 0;
+        const countInAllowed = allowedCounts.get(emoji) || 0;
+        score += coveredInMain * countInAllowed;
+    }
+
+    return score;
+}
+
+/**
+ * Calculates the initial score: for each emoji, count in main grid × count in allowed region
+ */
+export function calculateInitialScore(regions: Region[]): number {
+    // Get all symbols in main and allowed regions
+    const allMainSymbols = getAllSymbolsWithCoords(regions, 'main-region');
+    const allAllowedSymbols = getAllSymbolsWithCoords(regions, 'allowed-region');
+
+    // Count occurrences of each emoji in main grid
+    const mainCounts = new Map<string, number>();
+    for (const item of allMainSymbols) {
+        mainCounts.set(item.symbol, (mainCounts.get(item.symbol) || 0) + 1);
+    }
+
+    // Count occurrences of each emoji in allowed region
+    const allowedCounts = new Map<string, number>();
+    for (const item of allAllowedSymbols) {
+        allowedCounts.set(item.symbol, (allowedCounts.get(item.symbol) || 0) + 1);
+    }
+
+    // Get all unique emojis from both regions
+    const allEmojis = new Set([...mainCounts.keys(), ...allowedCounts.keys()]);
+
+    // Calculate score: sum of (count in main × count in allowed) for each emoji
+    let score = 0;
+    for (const emoji of allEmojis) {
+        const countInMain = mainCounts.get(emoji) || 0;
+        const countInAllowed = allowedCounts.get(emoji) || 0;
+        score += countInMain * countInAllowed;
+    }
+
+    return score;
 }
 
 /**
