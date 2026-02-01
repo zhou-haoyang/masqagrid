@@ -14,12 +14,13 @@ interface GameCanvasProps {
     level: Level;
     onNextLevel: () => void;
     onReplay: () => void;
+    onLevelComplete?: () => void;
     hasNextLevel: boolean;
 }
 
 const CELL_SIZE = 40; // Pixels per cell
 
-export const GameCanvas: React.FC<GameCanvasProps> = ({ level, onNextLevel, onReplay, hasNextLevel }) => {
+export const GameCanvas: React.FC<GameCanvasProps> = ({ level, onNextLevel, onReplay, onLevelComplete, hasNextLevel }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const [pieces, setPieces] = useState<Piece[]>(initialPiecesWithIds(level.initialPieces));
     const [history, setHistory] = useState<Piece[][]>([]);
@@ -52,8 +53,13 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level, onNextLevel, onRe
             console.log('Covered Allowed Score:', winState.coveredAllowedScore);
             console.log('Final Score Calculated:', score);
             setFinalScore(score);
+
+            // Notify parent that level is completed
+            if (onLevelComplete) {
+                onLevelComplete();
+            }
         }
-    }, [winState.isWin, winState.coveredAllowedScore, finalScore, regions]);
+    }, [winState.isWin, winState.coveredAllowedScore, finalScore, regions, onLevelComplete]);
 
     // Drag State
     const [draggedPieceId, setDraggedPieceId] = useState<string | null>(null);
