@@ -75,7 +75,7 @@ export default function Home() {
 
       // Update high score
       if (!newProgress.highScores) newProgress.highScores = {};
-      const currentHighScore = newProgress.highScores[levelId] || 0;
+      const currentHighScore = newProgress.highScores[levelId] || -1;
       if (score > currentHighScore) {
         newProgress.highScores[levelId] = score;
       }
@@ -171,7 +171,7 @@ export default function Home() {
             MASQAGRID
           </h1>
           <p className="text-lg text-[var(--foreground)] opacity-70 max-w-md mx-auto">
-            Cover symbols with boolean logic pieces to solve puzzles
+            Mask symbols with boolean logic pieces to solve puzzles
           </p>
         </div>
 

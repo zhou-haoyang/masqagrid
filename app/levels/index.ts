@@ -5,6 +5,7 @@ export interface LevelMetadata {
   id: string;
   name: string;
   level: Level;
+  filename: string;
 }
 
 // Type definition for Webpack's require.context
@@ -35,8 +36,9 @@ export const LEVELS: LevelMetadata[] = levelModules.keys().map((fileName: string
     id: level.id,
     name: level.name,
     level: level,
+    filename: fileName,
   };
-}).sort((a, b) => a.id.localeCompare(b.id));
+}).sort((a, b) => a.filename.localeCompare(b.filename, undefined, { numeric: true, sensitivity: 'base' }));
 
 // Helper to get level by ID
 export function getLevelById(id: string): Level | null {
