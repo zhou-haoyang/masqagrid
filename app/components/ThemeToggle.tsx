@@ -37,8 +37,8 @@ export function ThemeToggle() {
     // Prevent hydration mismatch
     if (!mounted) {
         return (
-            <button className="p-2 rounded-lg bg-slate-200 dark:bg-slate-800 opacity-50 cursor-default">
-                <Sun className="w-5 h-5 text-slate-800 dark:text-slate-200" />
+            <button className="flex items-center gap-2 px-4 py-3 border-b-4 border-gray-400 dark:border-gray-950 bg-gray-200 dark:bg-gray-800 opacity-50 cursor-default font-bold text-xs uppercase shadow-md text-gray-900 dark:text-white">
+                <Sun size={16} className="text-gray-900 dark:text-white" /> <span className="hidden sm:inline">Light</span>
             </button>
         );
     }
@@ -46,13 +46,25 @@ export function ThemeToggle() {
     return (
         <button
             onClick={toggleTheme}
-            className="p-2 rounded-lg bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors"
+            className={`
+                flex items-center gap-2 px-4 py-3 
+                border-b-4 active:border-b-0 active:translate-y-1 
+                font-bold text-xs uppercase shadow-md transition-all
+                ${isDark
+                    ? 'bg-gray-800 text-white hover:bg-gray-700 border-gray-950'
+                    : 'bg-gray-200 text-gray-900 hover:bg-gray-300 border-gray-400'
+                }
+            `}
             aria-label="Toggle theme"
         >
             {isDark ? (
-                <Moon className="w-5 h-5 text-slate-200" />
+                <>
+                    <Moon size={16} /> <span className="hidden sm:inline">Dark</span>
+                </>
             ) : (
-                <Sun className="w-5 h-5 text-slate-800" />
+                <>
+                    <Sun size={16} /> <span className="hidden sm:inline">Light</span>
+                </>
             )}
         </button>
     );
