@@ -20,22 +20,10 @@ export default <Level>{
         "IIIIIIII",
         "IIIIIIII"
     ],
-    mainSymbols: "🐑🐑🐺🐺🐑🐑🐑🐺🐺🐺🐺🐑🐺🐺🐺🐺🐺🐺🐺🐺🐺🐺🐺🐺🐺🐑🐑🐑🐑🐺🐺🐑🐑🐑🐑🐺",
+    mainSymbols: "🐑🐺🐺🐺🐺🐑🐑🐺🐺🐺🐺🐑🐺🐺🐺🐺🐺🐺🐺🐺🐺🐺🐺🐺🐺🐑🐑🐑🐑🐺🐺🐑🐑🐑🐑🐺",
     allowedSymbols: "🐑",
     disallowedSymbols: "🐺🐺🐺🐺🐺🐺",
     initialPieces: [
-        {
-            id: 'item-1769955186906-ch85xwd',
-            type: PieceType.UNION,
-            position: { x: 1, y: 7 },
-            shape: [[0,1,1,1,1,0],[0,1,1,1,1,0]]
-        },
-        {
-            id: 'item-1769955213454-5esu45x',
-            type: PieceType.XOR,
-            position: { x: 1, y: 7 },
-            shape: [[1,0,0,0,0,1],[1,0,0,0,0,1],[1,1,1,1,1,1],[0,0,1,1,0,0],[0,0,1,1,0,0]]
-        },
         {
             id: 'item-1769955285902-eklb2gq',
             type: PieceType.INTERSECT,
@@ -47,6 +35,18 @@ export default <Level>{
             type: PieceType.INTERSECT,
             position: { x: 5, y: 10 },
             shape: [[1,1,1],[1,1,1]]
+        },
+        {
+            id: 'item-1769963699618-tj79s51',
+            type: PieceType.XOR,
+            position: { x: 1, y: 7 },
+            shape: [[1,0,0,0,0,1],[1,0,0,0,0,1],[1,1,1,1,1,1],[0,0,1,1,0,0],[0,0,1,1,0,0]]
+        },
+        {
+            id: 'item-1769963716505-6fv1th4',
+            type: PieceType.UNION,
+            position: { x: 2, y: 7 },
+            shape: [[1,1,1,1],[1,1,1,1]]
         }
     ]
 };
