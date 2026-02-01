@@ -384,9 +384,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level, onNextLevel, onRe
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                fontSize: '16px',
-                                fontFamily: 'var(--font-pixel)',
-                                color: 'var(--foreground)',
+                                fontFamily: 'var(--font-emoji), var(--font-pixel)',
                                 zIndex: isViolating ? 6 : (cellType === '#' ? 5 : 0),
                                 boxSizing: 'border-box',
                                 boxShadow: cellType === '#' ? 'inset 2px 2px 0 rgba(255,255,255,0.1), inset -2px -2px 0 rgba(0,0,0,0.3)' : 'none',
@@ -483,7 +481,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level, onNextLevel, onRe
                         <div className="flex flex-col gap-1">
                             {winState.allowedStats.map(stat => (
                                 <div key={stat.emoji} className="px-2 py-1 bg-green-50 border-2 border-green-300 font-bold flex items-center gap-2">
-                                    <span className="text-base">{stat.emoji}</span>
+                                    <span className="text-base font-emoji">{stat.emoji}</span>
                                     <span className="text-gray-600">
                                         {stat.countInMain} × {stat.totalInRegion}
                                     </span>
@@ -528,7 +526,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level, onNextLevel, onRe
                         <div className="flex flex-col gap-1">
                             {winState.disallowedStats.map(stat => (
                                 <div key={stat.emoji} className="px-2 py-1 bg-red-50 border-2 border-red-300 font-bold flex items-center gap-2">
-                                    <span className="text-base">{stat.emoji}</span>
+                                    <span className="text-base font-emoji">{stat.emoji}</span>
                                     <span className="text-gray-600">{stat.countInMain}</span>
                                 </div>
                             ))}
