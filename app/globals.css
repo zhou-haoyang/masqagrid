@@ -25,9 +25,9 @@
   /* Red 200 */
   --color-region-wood: #ffedd5;
   /* Orange 100 */
-  --color-wall: #374151;
+  --color-wall: #e3f1fd;
   /* Gray 700 */
-  --color-wall-accent: #1f2937;
+  --color-wall-accent: #b0bcc6;
   /* Gray 800 */
 
   --panel-bg: #ffffff;
@@ -102,9 +102,12 @@ body {
   /* Ensure images scaling stays crisp */
 
 
-  -webkit-user-select: none;  /* Chrome all / Safari all */
-  -moz-user-select: none;     /* Firefox all */
-  -ms-user-select: none;      /* IE 10+ */
+  -webkit-user-select: none;
+  /* Chrome all / Safari all */
+  -moz-user-select: none;
+  /* Firefox all */
+  -ms-user-select: none;
+  /* IE 10+ */
 
   /* No support for these yet, use at own risk */
   -o-user-select: none;
