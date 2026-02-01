@@ -1,0 +1,37 @@
+appId: com.masqagrid.app
+productName: MasqaGrid
+directories:
+  output: release
+  buildResources: build
+
+files:
+  - out/**/*
+  - dist-electron/**/*
+  - package.json
+
+asarUnpack:
+  - out/**/*
+
+mac:
+  category: public.app-category.games
+  target:
+    - dmg
+    - zip
+
+win:
+  target:
+    - nsis
+    - portable
+
+linux:
+  target:
+    - AppImage
+    - deb
+  category: Game
+
+dmg:
+  title: "MasqaGrid ${version}"
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
