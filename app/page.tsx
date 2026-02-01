@@ -151,6 +151,16 @@ export default function Home() {
         </div>
 
         <div className="fixed top-4 right-4 z-50 flex flex-col gap-2 items-end">
+          {/* About Us Button */}
+          <Link
+            href="/about"
+            className="flex items-center gap-2 px-3 py-2 bg-[var(--panel-bg)] border-2 border-[var(--panel-border)] shadow-[2px_2px_0_0_rgba(0,0,0,0.2)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,0.3)] active:shadow-none active:translate-x-1 active:translate-y-1 transition-all text-[var(--panel-text)] font-bold text-xs"
+            style={{ fontFamily: 'var(--font-pixel)' }}
+          >
+            <Info size={14} />
+            ABOUT US
+          </Link>
+
           {/* Unlock All Button */}
           <button
             onClick={handleUnlockAll}
@@ -177,17 +187,8 @@ export default function Home() {
           <h1 className="text-6xl font-bold text-[var(--foreground)] mb-4 tracking-tight" style={{ fontFamily: 'var(--font-pixel)' }}>
             MASQAGRID
           </h1>
-          <p className="text-lg text-[var(--foreground)] opacity-70 max-w-md mx-auto mb-4">
-            Mask symbols with boolean logic pieces to solve puzzles
+          <p className="text-lg text-[var(--foreground)] opacity-70 max-w-md mx-auto">
           </p>
-          <Link
-            href="/about"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--panel-bg)] border-2 border-[var(--panel-border)] shadow-[2px_2px_0_0_rgba(0,0,0,0.2)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,0.3)] active:shadow-none active:translate-x-1 active:translate-y-1 transition-all text-[var(--panel-text)] font-bold text-sm"
-            style={{ fontFamily: 'var(--font-pixel)' }}
-          >
-            <Info size={16} />
-            ABOUT US
-          </Link>
         </div>
 
         {/* Level Selection Grid */}
@@ -205,7 +206,7 @@ export default function Home() {
                   key={level.id}
                   onClick={() => isUnlocked && handleLevelSelect(level.id)}
                   disabled={!isUnlocked}
-                  className={`group relative border-4 shadow-[4px_4px_0_0_rgba(0,0,0,0.2)] transition-all p-6 flex flex-col items-center gap-3 ${
+                  className={`group relative border-4 shadow-[4px_4px_0_0_rgba(0,0,0,0.2)] transition-all p-5 flex flex-col items-center gap-1 ${
                     isUnlocked
                       ? 'bg-[var(--panel-bg)] border-[var(--panel-border)] hover:shadow-[6px_6px_0_0_rgba(0,0,0,0.3)] active:shadow-none active:translate-x-1 active:translate-y-1 cursor-pointer'
                       : 'bg-gray-300 border-gray-500 opacity-50 cursor-not-allowed'
@@ -218,25 +219,25 @@ export default function Home() {
                     </div>
                   )}
 
-                  <div className="text-3xl font-bold text-[var(--panel-text)]" style={{ fontFamily: 'var(--font-pixel)' }}>
+                  <div className="text-2xl font-bold text-[var(--panel-text)]" style={{ fontFamily: 'var(--font-pixel)' }}>
                     {index + 1}
                   </div>
-                  <div className="text-xs font-bold text-[var(--panel-text)] uppercase text-center" style={{ fontFamily: 'var(--font-pixel)' }}>
+                  {/* Level name - reserved 2 lines */}
+                  <div className="h-8 flex items-center justify-center text-xs font-bold text-[var(--panel-text)] uppercase text-center leading-tight" style={{ fontFamily: 'var(--font-pixel)' }}>
                     {level.name}
                   </div>
-                  
-                  {/* High Score Display */}
-                  {isCompleted && progress.highScores?.[level.id] !== undefined && (
-                    <div className="mt-1 px-2 py-0.5 bg-yellow-100 border-2 border-yellow-400 text-yellow-800 text-[10px] font-bold uppercase rounded-sm">
-                      Best: {progress.highScores[level.id]}
-                    </div>
-                  )}
 
-                  {isUnlocked ? (
-                    <Play className="w-5 h-5 text-[var(--panel-text)] opacity-50 group-hover:opacity-100 transition-opacity" />
-                  ) : (
-                    <Lock className="w-5 h-5 text-gray-600" />
-                  )}
+
+                  {/* High Score Display - always reserve space */}
+                  <div className="h-6 flex items-center justify-center">
+                    {isCompleted && progress.highScores?.[level.id] !== undefined ? (
+                      <div className="px-2 py-0.5 bg-yellow-100 border-2 border-yellow-400 text-yellow-800 text-[10px] font-bold uppercase rounded-sm">
+                        Best: {progress.highScores[level.id]}
+                      </div>
+                    ) : (
+                      <div className="h-full" />
+                    )}
+                  </div>
                 </button>
               );
             })}

@@ -125,4 +125,16 @@ body {
   /* No support for these yet, use at own risk */
   -o-user-select: none;
   user-select: none;
+
+  /* Hide scrollbars for a more native app feel */
+  overflow: overlay;
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE and Edge */
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+body::-webkit-scrollbar {
+  display: none;
 }
