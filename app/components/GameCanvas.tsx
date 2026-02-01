@@ -555,12 +555,12 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level, onNextLevel, onRe
                             </div>
                         )}
 
-                        {/* Initial Score Display */}
-                        {/* <div className="mt-2 px-2 py-1 bg-blue-50 border-2 border-blue-300 font-bold text-blue-700">
+                        {/* Current Score Display */}
+                        <div className="mt-2 px-2 py-1 bg-blue-50 border-2 border-blue-300 font-bold text-blue-700">
                             <span className="text-xs">
-                                INITIAL SCORE: {initialScore}
+                                CURRENT SCORE: {initialScore - winState.coveredAllowedScore}
                             </span>
-                        </div> */}
+                        </div>
 
                         {/* Personal Best Display */}
                         {highScore !== undefined && highScore > 0 && (
@@ -585,25 +585,6 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level, onNextLevel, onRe
                                 </div>
                             ))}
                         </div>
-                    </div>
-                )}
-
-                {!winState.isWin && winState.violations.length > 0 && (
-                    <div className="text-xs text-red-600">
-                        <p className="font-bold mb-1">VIOLATIONS:</p>
-                        <div className="flex flex-col gap-1 mt-1">
-                            {winState.violations.map(v => (
-                                <span key={v} className="px-1 bg-red-100 border-2 border-red-300 font-bold block w-fit">
-                                    {v}
-                                </span>
-                            ))}
-                        </div>
-                    </div>
-                )}
-
-                {!winState.isWin && winState.violations.length === 0 && (
-                    <div className="text-xs text-gray-500 font-bold">
-                        NO VIOLATIONS...
                     </div>
                 )}
             </div>
