@@ -506,11 +506,11 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level, onNextLevel, onRe
                         )}
 
                         {/* Initial Score Display */}
-                        <div className="mt-2 px-2 py-1 bg-blue-50 border-2 border-blue-300 font-bold text-blue-700">
+                        {/* <div className="mt-2 px-2 py-1 bg-blue-50 border-2 border-blue-300 font-bold text-blue-700">
                             <span className="text-xs">
                                 INITIAL SCORE: {initialScore}
                             </span>
-                        </div>
+                        </div> */}
 
                         {/* Personal Best Display */}
                         {highScore !== undefined && highScore > 0 && (
