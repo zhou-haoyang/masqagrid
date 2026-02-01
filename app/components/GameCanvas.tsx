@@ -28,6 +28,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level, onNextLevel, onRe
     const [history, setHistory] = useState<Piece[][]>([]);
     const [moveId, setMoveId] = useState(0); // Trigger animation sync
     const [finalScore, setFinalScore] = useState<number | null>(null);
+    const [showVictoryPanel, setShowVictoryPanel] = useState(false);
     const [winState, setWinState] = useState<WinState>({
         isWin: false,
         violations: [],
@@ -44,17 +45,14 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level, onNextLevel, onRe
     const { regions, symbolMap, gridCells } = parsed;
 
     // Calculate initial score (maximum possible score)
-    const initialScore = useMemo(() => calculateInitialScore(regions), [regions]);
+    const initialScore = 100;
 
     // Calculate final score when player wins
     useEffect(() => {
         if (winState.isWin && finalScore === null) {
-            const maxScore = calculateInitialScore(regions);
-            const score = maxScore - winState.coveredAllowedScore;
-            console.log('Max Score:', maxScore);
-            console.log('Covered Allowed Score:', winState.coveredAllowedScore);
-            console.log('Final Score Calculated:', score);
+            const score = initialScore - winState.coveredAllowedScore;
             setFinalScore(score);
+            setShowVictoryPanel(true);
 
             // Notify parent that level is completed
             if (onLevelComplete) {
@@ -275,6 +273,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level, onNextLevel, onRe
             setWinState(checkWinCondition(regions, initial, level.coveredAllowedSymbolLimit)); // Re-check
             setMoveId(m => m + 1); // Trigger animation
             setFinalScore(null); // Reset score
+            setShowVictoryPanel(false); // Hide victory panel
         }
     };
 
@@ -646,12 +645,13 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level, onNextLevel, onRe
 
             {/* Victory Panel */}
             <VictoryPanel
-                isOpen={winState.isWin}
+                isOpen={showVictoryPanel}
                 score={finalScore || 0}
                 hasNextLevel={hasNextLevel}
                 onNextLevel={onNextLevel}
                 onReplay={onReplay}
                 onBackToLevels={onBackToLevels}
+                onClose={() => setShowVictoryPanel(false)}
             />
         </div>
     );

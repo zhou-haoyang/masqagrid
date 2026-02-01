@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Trophy, RotateCcw, ChevronRight } from 'lucide-react';
+import { Trophy, RotateCcw, ChevronRight, X } from 'lucide-react';
 
 interface VictoryPanelProps {
   isOpen: boolean;
@@ -10,6 +10,7 @@ interface VictoryPanelProps {
   onNextLevel: () => void;
   onReplay: () => void;
   onBackToLevels: () => void;
+  onClose: () => void;
 }
 
 export const VictoryPanel: React.FC<VictoryPanelProps> = ({
@@ -18,7 +19,8 @@ export const VictoryPanel: React.FC<VictoryPanelProps> = ({
   hasNextLevel,
   onNextLevel,
   onReplay,
-  onBackToLevels
+  onBackToLevels,
+  onClose
 }) => {
   if (!isOpen) return null;
 
@@ -29,6 +31,14 @@ export const VictoryPanel: React.FC<VictoryPanelProps> = ({
 
       {/* Panel */}
       <div className="relative z-10 bg-[var(--panel-bg)] border-8 border-[var(--panel-border)] shadow-[12px_12px_0_0_rgba(0,0,0,1)] p-8 max-w-md">
+        {/* Close Button */}
+        <button
+          onClick={onClose}
+          className="absolute -top-4 -right-4 p-2 bg-red-500 hover:bg-red-600 border-4 border-red-700 shadow-[4px_4px_0_0_rgba(0,0,0,0.3)] transition-colors"
+          aria-label="Close"
+        >
+          <X size={20} className="text-white" strokeWidth={3} />
+        </button>
         {/* Trophy Icon */}
         <div className="flex justify-center mb-6">
           <div className="bg-yellow-400 border-4 border-yellow-600 p-4 shadow-[4px_4px_0_0_rgba(0,0,0,0.3)]">
