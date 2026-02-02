@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Press_Start_2P } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
+import { SafariDetector } from "@/components/SafariDetector";
 
 const pressStart2P = Press_Start_2P({
   weight: "400",
@@ -27,6 +28,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${pressStart2P.variable} ${serenityEmoji.variable} antialiased`}>
       <body>
+        <SafariDetector />
         {children}
       </body>
     </html>

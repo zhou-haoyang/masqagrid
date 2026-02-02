@@ -52,6 +52,10 @@
   font-family: var(--font-emoji), var(--font-pixel);
 }
 
+html.safari {
+  --font-emoji: "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
