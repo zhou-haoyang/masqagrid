@@ -150,41 +150,41 @@ export default function Home() {
           <ThemeToggle />
         </div>
 
-        <div className="fixed top-4 right-4 z-50 flex flex-col gap-2 items-end">
+        <div className="fixed bottom-4 left-4 md:top-4 md:right-4 md:bottom-auto md:left-auto z-50 flex flex-row md:flex-col gap-2 md:items-end">
           {/* About Us Button */}
           <Link
             href="/about"
-            className="flex items-center gap-2 px-3 py-2 bg-[var(--panel-bg)] border-2 border-[var(--panel-border)] shadow-[2px_2px_0_0_rgba(0,0,0,0.2)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,0.3)] active:shadow-none active:translate-x-1 active:translate-y-1 transition-all text-[var(--panel-text)] font-bold text-xs"
+            className="flex items-center gap-2 px-4 md:px-3 py-3 md:py-2 bg-[var(--panel-bg)] border-2 border-[var(--panel-border)] shadow-[2px_2px_0_0_rgba(0,0,0,0.2)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,0.3)] active:shadow-none active:translate-x-1 active:translate-y-1 transition-all text-[var(--panel-text)] font-bold text-xs"
             style={{ fontFamily: 'var(--font-pixel)' }}
           >
-            <Info size={14} />
-            ABOUT US
+            <Info size={16} className="md:w-3.5 md:h-3.5" />
+            <span className="hidden md:inline">ABOUT US</span>
           </Link>
 
           {/* Unlock All Button */}
           <button
             onClick={handleUnlockAll}
-            className="flex items-center gap-2 px-3 py-2 bg-gray-300 border-2 border-gray-400 shadow-[2px_2px_0_0_rgba(0,0,0,0.2)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,0.3)] active:shadow-none active:translate-x-1 active:translate-y-1 transition-all text-white font-bold text-xs"
+            className="flex items-center gap-2 px-4 md:px-3 py-3 md:py-2 bg-gray-300 border-2 border-gray-400 shadow-[2px_2px_0_0_rgba(0,0,0,0.2)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,0.3)] active:shadow-none active:translate-x-1 active:translate-y-1 transition-all text-white font-bold text-xs"
             style={{ fontFamily: 'var(--font-pixel)' }}
           >
-            <Unlock size={14} />
-            UNLOCK ALL
+            <Unlock size={16} className="md:w-3.5 md:h-3.5" />
+            <span className="hidden md:inline">UNLOCK ALL</span>
           </button>
 
           {/* Reset Progress Button */}
           <button
             onClick={handleResetProgress}
-            className="flex items-center gap-2 px-3 py-2 bg-red-400 border-2 border-red-600 shadow-[2px_2px_0_0_rgba(0,0,0,0.2)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,0.3)] active:shadow-none active:translate-x-1 active:translate-y-1 transition-all text-white font-bold text-xs"
+            className="flex items-center gap-2 px-4 md:px-3 py-3 md:py-2 bg-red-400 border-2 border-red-600 shadow-[2px_2px_0_0_rgba(0,0,0,0.2)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,0.3)] active:shadow-none active:translate-x-1 active:translate-y-1 transition-all text-white font-bold text-xs"
             style={{ fontFamily: 'var(--font-pixel)' }}
           >
-            <RefreshCcw size={14} />
-            RESET
+            <RefreshCcw size={16} className="md:w-3.5 md:h-3.5" />
+            <span className="hidden md:inline">RESET</span>
           </button>
         </div>
 
         {/* Title Section */}
-        <div className="text-center mb-12">
-          <h1 className="text-6xl font-bold text-[var(--foreground)] mb-4 tracking-tight" style={{ fontFamily: 'var(--font-pixel)' }}>
+        <div className="text-center mb-12 px-4">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-[var(--foreground)] mb-4 tracking-tight" style={{ fontFamily: 'var(--font-pixel)' }}>
             MASQAGRID
           </h1>
           <p className="text-lg text-[var(--foreground)] opacity-70 max-w-md mx-auto">
@@ -193,7 +193,7 @@ export default function Home() {
 
         {/* Level Selection Grid */}
         <div className="max-w-4xl w-full">
-          <h2 className="text-2xl font-bold text-[var(--foreground)] mb-6 text-center uppercase" style={{ fontFamily: 'var(--font-pixel)' }}>
+          <h2 className="text-2xl font-bold text-[var(--foreground)] opacity-70 mb-6 text-center uppercase" style={{ fontFamily: 'var(--font-pixel)' }}>
             Select Level
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -264,8 +264,8 @@ export default function Home() {
         Levels
       </button>
 
-      <div className="text-center mb-6">
-        <h1 className="text-4xl font-bold text-[var(--foreground)] mb-2" style={{ fontFamily: 'var(--font-pixel)' }}>
+      <div className="text-center mb-6 px-4">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--foreground)] mb-2" style={{ fontFamily: 'var(--font-pixel)' }}>
           {currentLevelData?.name || 'Masqagrid'}
         </h1>
       </div>

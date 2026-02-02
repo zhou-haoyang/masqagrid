@@ -8,7 +8,7 @@ import { parseLevel } from '../lib/level-parser';
 import { checkWinCondition, WinState, getAllSymbolsWithCoords, calculateInitialScore } from '../lib/rules-engine'; // [NEW]
 import { PieceRenderer } from './PieceRenderer';
 import { VictoryPanel } from './VictoryPanel';
-import { RefreshCcw, Undo2, Trophy, AlertTriangle, RotateCw, FlipHorizontal } from 'lucide-react'; // Added icons
+import { RefreshCcw, Undo2, Trophy, AlertTriangle, RotateCw, FlipHorizontal, ChevronRight, ChevronLeft } from 'lucide-react'; // Added icons
 
 interface GameCanvasProps {
     level: Level;
@@ -20,10 +20,29 @@ interface GameCanvasProps {
     highScore?: number;
 }
 
-const CELL_SIZE = 40; // Pixels per cell
+const DEFAULT_CELL_SIZE = 40; // Default pixels per cell
 
 export const GameCanvas: React.FC<GameCanvasProps> = ({ level, onNextLevel, onReplay, onBackToLevels, onLevelComplete, hasNextLevel, highScore }) => {
     const containerRef = useRef<HTMLDivElement>(null);
+
+    // Calculate responsive cell size
+    const [viewportWidth, setViewportWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024);
+
+    useEffect(() => {
+        const handleResize = () => setViewportWidth(window.innerWidth);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    // Calculate cell size to fit screen on mobile
+    const CELL_SIZE = useMemo(() => {
+        const padding = 32; // Account for page padding
+        const maxWidth = viewportWidth - padding;
+        const calculatedSize = Math.floor(maxWidth / level.width);
+        // Use smaller of default size or calculated size, minimum 10px for better mobile fit
+        return Math.max(10, Math.min(DEFAULT_CELL_SIZE, calculatedSize));
+    }, [viewportWidth, level.width]);
+
     const [pieces, setPieces] = useState<Piece[]>(initialPiecesWithIds(level.initialPieces));
     const [history, setHistory] = useState<Piece[][]>([]);
     const [moveId, setMoveId] = useState(0); // Trigger animation sync
@@ -68,6 +87,14 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level, onNextLevel, onRe
     const [dragFlipped, setDragFlipped] = useState(false);
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 }); // Offset cursor -> top-left of piece (pixels)
     const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 }); // Current pixel position of top-left
+    const [isPanelOpen, setIsPanelOpen] = useState(false); // Status panel toggle for mobile
+
+    // Hover-to-activate state for mobile rotate/flip
+    const [hoverTarget, setHoverTarget] = useState<'rotate' | 'flip' | null>(null);
+    const [hoverStartTime, setHoverStartTime] = useState<number | null>(null);
+    const [hoverProgress, setHoverProgress] = useState(0);
+    const rotateButtonRef = useRef<HTMLButtonElement>(null);
+    const flipButtonRef = useRef<HTMLButtonElement>(null);
 
     function initialPiecesWithIds(ps: Piece[]) {
         return ps.map(p => ({ ...p, id: p.id || crypto.randomUUID() }));
@@ -175,6 +202,42 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level, onNextLevel, onRe
             x: mouseX - dragOffset.x,
             y: mouseY - dragOffset.y
         });
+
+        // Check if pointer is over rotate/flip buttons (mobile only)
+        const clientX = e.clientX;
+        const clientY = e.clientY;
+
+        let newTarget: 'rotate' | 'flip' | null = null;
+
+        if (rotateButtonRef.current) {
+            const rotateRect = rotateButtonRef.current.getBoundingClientRect();
+            if (
+                clientX >= rotateRect.left &&
+                clientX <= rotateRect.right &&
+                clientY >= rotateRect.top &&
+                clientY <= rotateRect.bottom
+            ) {
+                newTarget = 'rotate';
+            }
+        }
+
+        if (!newTarget && flipButtonRef.current) {
+            const flipRect = flipButtonRef.current.getBoundingClientRect();
+            if (
+                clientX >= flipRect.left &&
+                clientX <= flipRect.right &&
+                clientY >= flipRect.top &&
+                clientY <= flipRect.bottom
+            ) {
+                newTarget = 'flip';
+            }
+        }
+
+        if (newTarget !== hoverTarget) {
+            setHoverTarget(newTarget);
+            setHoverStartTime(newTarget ? Date.now() : null);
+            setHoverProgress(0);
+        }
     };
 
     const handlePointerUp = (e: React.PointerEvent) => {
@@ -244,6 +307,11 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level, onNextLevel, onRe
         setDraggedPieceShape(null);
         setDragRotation(0);
         setDragFlipped(false);
+
+        // Reset hover state
+        setHoverTarget(null);
+        setHoverStartTime(null);
+        setHoverProgress(0);
     };
 
     const handleUndo = () => {
@@ -281,6 +349,36 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level, onNextLevel, onRe
     useEffect(() => {
         setWinState(checkWinCondition(regions, pieces, level.coveredAllowedSymbolLimit));
     }, []); // Run once
+
+    // Handle hover-to-activate timer for mobile rotate/flip
+    useEffect(() => {
+        if (!hoverTarget || !hoverStartTime) {
+            setHoverProgress(0);
+            return;
+        }
+
+        const HOVER_DURATION = 1000; // 1 second
+        const interval = setInterval(() => {
+            const elapsed = Date.now() - hoverStartTime;
+            const progress = Math.min(elapsed / HOVER_DURATION, 1);
+            setHoverProgress(progress);
+
+            if (progress >= 1) {
+                // Trigger action
+                if (hoverTarget === 'rotate') {
+                    setDragRotation(r => r + 90);
+                } else if (hoverTarget === 'flip') {
+                    setDragFlipped(f => !f);
+                }
+                // Reset hover state
+                setHoverTarget(null);
+                setHoverStartTime(null);
+                setHoverProgress(0);
+            }
+        }, 16); // ~60fps
+
+        return () => clearInterval(interval);
+    }, [hoverTarget, hoverStartTime]);
 
     // [NEW] Track resolving cells for exit animation
     const [resolvingCells, setResolvingCells] = useState<{ x: number, y: number, id: string }[]>([]);
@@ -405,7 +503,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level, onNextLevel, onRe
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                fontFamily: 'var(--font-emoji), var(--font-pixel)',
+                                fontFamily: "var(--font-emoji), 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'Android Emoji', sans-serif",
                                 zIndex: (isViolating || isCoveredAllowed) ? 6 : (cellType === '#' ? 5 : 0),
                                 boxSizing: 'border-box',
                                 boxShadow: cellType === '#' ? 'inset 2px 2px 0 rgba(255,255,255,0.1), inset -2px -2px 0 rgba(0,0,0,0.3)' : 'none',
@@ -484,7 +582,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level, onNextLevel, onRe
     // Removed renderRegions - now using renderGrid
 
     return (
-        <div className="flex flex-col items-center gap-4 p-8 select-none relative">
+        <div className="flex flex-col items-center gap-4 p-2 select-none relative">
             <style dangerouslySetInnerHTML={{
                 __html: `
                 @keyframes pulsate-red {
@@ -515,8 +613,17 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level, onNextLevel, onRe
                 }
             `}} />
             {/* Status Panel */}
-            <div className={`fixed top-4 right-4 p-4 border-4 shadow-[4px_4px_0_0_rgba(0,0,0,0.2)] transition-all z-50 ${winState.isWin ? 'bg-green-100 border-green-600' : 'bg-[var(--panel-bg)] border-[var(--panel-border)]'
-                }`}>
+            <div className={`fixed top-4 p-4 border-4 shadow-[4px_4px_0_0_rgba(0,0,0,0.2)] transition-all duration-300 z-70 ${winState.isWin ? 'bg-green-100 border-green-600' : 'bg-[var(--panel-bg)] border-[var(--panel-border)]'
+                } ${isPanelOpen ? 'right-4' : '-right-full'} md:right-4`}>
+                {/* Toggle Button - visible on mobile only */}
+                <button
+                    onClick={() => setIsPanelOpen(!isPanelOpen)}
+                    className={`md:hidden border-4 border-r-0 p-2 z-75 shadow-[4px_4px_0_0_rgba(0,0,0,0.2)] transition-all duration-300 ${winState.isWin ? 'bg-green-100 border-green-600' : 'bg-[var(--panel-bg)] border-[var(--panel-border)]'} ${isPanelOpen ? 'absolute left-0 top-0 -translate-x-full' : 'fixed right-0 top-4'}`}
+                    aria-label={isPanelOpen ? 'Hide status panel' : 'Show status panel'}
+                >
+                    {isPanelOpen ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+                </button>
+
                 <div className="flex items-center gap-4 mb-2">
                     {winState.isWin ? (
                         <Trophy className="text-green-600" size={24} />
@@ -589,30 +696,36 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level, onNextLevel, onRe
                 )}
             </div>
 
-            {/* Controls - Positioned at bottom center */}
-            <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 flex gap-4">
+            {/* Controls - Bottom-left on mobile, bottom-center on desktop */}
+            <div className="fixed bottom-4 left-4 md:left-1/2 md:-translate-x-1/2 z-40 flex gap-2">
                 <button onClick={handleUndo} disabled={history.length === 0}
                     className="flex items-center gap-2 px-4 py-3 bg-gray-800 text-white hover:bg-gray-700 disabled:opacity-50 border-b-4 border-gray-950 active:border-b-0 active:translate-y-1 font-bold text-xs uppercase shadow-md transition-all">
-                    <Undo2 size={16} /> Undo (Z)
+                    <Undo2 size={16} />
+                    <span className="hidden md:inline">Undo</span>
                 </button>
                 <button onClick={handleReset}
                     className="flex items-center gap-2 px-4 py-3 bg-gray-200 text-gray-900 hover:bg-gray-300 border-b-4 border-gray-400 active:border-b-0 active:translate-y-1 font-bold text-xs uppercase shadow-md transition-all">
-                    <RefreshCcw size={16} /> Reset (C)
+                    <RefreshCcw size={16} />
+                    <span className="hidden md:inline">Reset</span>
                 </button>
             </div>
 
-            {/* Game Canvas Container */}
-            <div
-                ref={containerRef}
-                className="relative bg-[var(--panel-bg)] shadow-[8px_8px_0_0_rgba(0,0,0,0.2)] border-4 border-[var(--panel-border)]"
-                style={{
-                    width: level.width * CELL_SIZE,
-                    height: level.height * CELL_SIZE,
-                    boxSizing: 'content-box'
-                }}
-                onPointerMove={handlePointerMove}
-                onPointerUp={handlePointerUp}
-            >
+            {/* Game Canvas Wrapper */}
+            <div className="max-w-full">
+                {/* Game Canvas Container */}
+                <div
+                    ref={containerRef}
+                    className="relative bg-[var(--panel-bg)] shadow-[8px_8px_0_0_rgba(0,0,0,0.2)] border-4 border-[var(--panel-border)] mx-auto"
+                    style={{
+                        width: level.width * CELL_SIZE,
+                        height: level.height * CELL_SIZE,
+                        boxSizing: 'content-box',
+                        touchAction: 'none',
+                        overflow: 'visible'
+                    }}
+                    onPointerMove={handlePointerMove}
+                    onPointerUp={handlePointerUp}
+                >
                 {/* Layer 0: Grid Lines */}
                 {renderGridLines()}
 
@@ -667,21 +780,61 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ level, onNextLevel, onRe
                                 dragRotation={isDragging ? dragRotation : 0}
                                 dragFlipped={isDragging ? dragFlipped : false}
                                 violatingCells={winState.violatingCells}
-                                allowedCells={isDragging ? [] : allowedCellCoords} // Don't do it for ghost piece as requested
+                                allowedCells={isDragging ? [] : allowedCellCoords}
                                 moveId={moveId}
                                 onPointerDown={isDragging ? undefined : (e: React.PointerEvent) => handlePointerDown(e, piece)}
+                                style={isDragging ? { zIndex: 50 } : undefined}
                             />
                         );
                     });
                 })()}
+                </div>
             </div>
 
             {/* Rotate/Flip Hints - Below game canvas */}
-            <div className={`mt-4 flex items-center gap-2 px-4 py-3 bg-[var(--panel-bg)] text-[var(--panel-text)] border-2 border-[var(--panel-border)] border-b-4 text-xs font-bold shadow-md transition-opacity ${draggedPieceId ? 'opacity-100' : 'opacity-0 pointer-events-none'
+            <div className={`mt-4 flex items-center gap-2 transition-opacity relative z-30 ${draggedPieceId ? 'opacity-100' : 'opacity-0 pointer-events-none'
                 }`}>
-                <RotateCw size={14} /> <span>Rotate: R</span>
-                <span className="w-0.5 h-4 bg-gray-300 mx-2" />
-                <FlipHorizontal size={14} /> <span>Flip: F</span>
+                {/* Rotate Button */}
+                <button
+                    ref={rotateButtonRef}
+                    onClick={() => draggedPieceId && setDragRotation(r => r + 90)}
+                    className={`relative overflow-hidden flex items-center gap-2 px-4 py-3 text-[var(--panel-text)] border-2 border-[var(--panel-border)] border-b-4 text-xs font-bold shadow-md transition-all ${
+                        hoverTarget === 'rotate' ? 'bg-blue-200 border-blue-400' : 'bg-[var(--panel-bg)]'
+                    } md:pointer-events-none md:bg-[var(--panel-bg)] md:border-[var(--panel-border)]`}
+                    disabled={!draggedPieceId}
+                >
+                    {/* Progress bar */}
+                    <div
+                        className="absolute inset-0 bg-blue-400 opacity-30 transition-all md:hidden"
+                        style={{ width: `${hoverTarget === 'rotate' ? hoverProgress * 100 : 0}%` }}
+                    />
+                    <RotateCw size={14} className="relative z-10" />
+                    <span className="relative z-10">
+                        <span className="md:hidden">Hover here to Rotate</span>
+                        <span className="hidden md:inline">Rotate: R</span>
+                    </span>
+                </button>
+
+                {/* Flip Button */}
+                <button
+                    ref={flipButtonRef}
+                    onClick={() => draggedPieceId && setDragFlipped(f => !f)}
+                    className={`relative overflow-hidden flex items-center gap-2 px-4 py-3 text-[var(--panel-text)] border-2 border-[var(--panel-border)] border-b-4 text-xs font-bold shadow-md transition-all ${
+                        hoverTarget === 'flip' ? 'bg-purple-200 border-purple-400' : 'bg-[var(--panel-bg)]'
+                    } md:pointer-events-none md:bg-[var(--panel-bg)] md:border-[var(--panel-border)]`}
+                    disabled={!draggedPieceId}
+                >
+                    {/* Progress bar */}
+                    <div
+                        className="absolute inset-0 bg-purple-400 opacity-30 transition-all md:hidden"
+                        style={{ width: `${hoverTarget === 'flip' ? hoverProgress * 100 : 0}%` }}
+                    />
+                    <FlipHorizontal size={14} className="relative z-10" />
+                    <span className="relative z-10">
+                        <span className="md:hidden">Hover here to Flip</span>
+                        <span className="hidden md:inline">Flip: F</span>
+                    </span>
+                </button>
             </div>
 
             {/* Victory Panel */}
